@@ -1,0 +1,23 @@
+{
+  "name": "@app0/worker",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "start": "tsx src/index.ts",
+    "import:feeds": "tsx src/cli.ts import-feeds",
+    "alerts:check": "tsx src/cli.ts check-alerts"
+  },
+  "dependencies": {
+    "@app0/core": "workspace:*",
+    "@app0/db": "workspace:*",
+    "croner": "^9.0.0",
+    "drizzle-orm": "^0.44.0",
+    "tsx": "^4.19.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.0",
+    "typescript": "^5.8.0"
+  }
+}

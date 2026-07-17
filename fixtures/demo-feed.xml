@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Testovací Heureka XML feed fiktívneho obchodu "MegaTech".
+  Slúži na lokálne overenie celej import pipeline (pozri fixtures/README.md).
+
+  Obsahuje zámerné prípady:
+  - položky s EAN zhodným so seed produktmi  → spárujú sa s existujúcim katalógom
+  - položka s novým EAN                      → automaticky založí nový produkt
+  - položka bez EAN                          → skončí ako nespárovaná (fáza 4: fuzzy)
+  - položka bez ceny                         → preskočí sa s varovaním
+-->
+<SHOP>
+  <SHOPITEM>
+    <ITEM_ID>MT-1001</ITEM_ID>
+    <PRODUCTNAME>Samsung Galaxy S24 128GB čierny</PRODUCTNAME>
+    <DESCRIPTION>Vlajková loď Samsungu s Galaxy AI.</DESCRIPTION>
+    <URL>http://localhost:8787/produkty/galaxy-s24</URL>
+    <PRICE_VAT>629,90</PRICE_VAT>
+    <MANUFACTURER>Samsung</MANUFACTURER>
+    <CATEGORYTEXT>Elektronika | Mobilné telefóny</CATEGORYTEXT>
+    <EAN>2001234500012</EAN>
+    <DELIVERY_DATE>0</DELIVERY_DATE>
+  </SHOPITEM>
+  <SHOPITEM>
+    <ITEM_ID>MT-1002</ITEM_ID>
+    <PRODUCTNAME>Sony WH-1000XM5 bezdrôtové slúchadlá</PRODUCTNAME>
+    <URL>http://localhost:8787/produkty/sony-wh1000xm5</URL>
+    <PRICE_VAT>315,00</PRICE_VAT>
+    <MANUFACTURER>Sony</MANUFACTURER>
+    <CATEGORYTEXT>Elektronika | Slúchadlá</CATEGORYTEXT>
+    <EAN>2001234500043</EAN>
+    <DELIVERY_DATE>2</DELIVERY_DATE>
+  </SHOPITEM>
+  <SHOPITEM>
+    <ITEM_ID>MT-1003</ITEM_ID>
+    <PRODUCTNAME>Apple AirPods Pro 2 USB-C</PRODUCTNAME>
+    <URL>http://localhost:8787/produkty/airpods-pro-2</URL>
+    <PRICE_VAT>265,00</PRICE_VAT>
+    <MANUFACTURER>Apple</MANUFACTURER>
+    <CATEGORYTEXT>Elektronika | Slúchadlá</CATEGORYTEXT>
+    <EAN>2001234500050</EAN>
+    <DELIVERY_DATE>0</DELIVERY_DATE>
+  </SHOPITEM>
+  <SHOPITEM>
+    <ITEM_ID>MT-2001</ITEM_ID>
+    <PRODUCTNAME>JBL Tune 520BT slúchadlá čierne</PRODUCTNAME>
+    <DESCRIPTION>Bezdrôtové slúchadlá na uši s výdržou 57 hodín.</DESCRIPTION>
+    <URL>http://localhost:8787/produkty/jbl-tune-520bt</URL>
+    <PRICE_VAT>39,90</PRICE_VAT>
+    <MANUFACTURER>JBL</MANUFACTURER>
+    <CATEGORYTEXT>Elektronika | Slúchadlá</CATEGORYTEXT>
+    <EAN>96385074</EAN>
+    <DELIVERY_DATE>0</DELIVERY_DATE>
+    <PARAM>
+      <PARAM_NAME>Farba</PARAM_NAME>
+      <VAL>čierna</VAL>
+    </PARAM>
+  </SHOPITEM>
+  <SHOPITEM>
+    <ITEM_ID>MT-3001</ITEM_ID>
+    <PRODUCTNAME>Trust bezdrôtová myš základná</PRODUCTNAME>
+    <URL>http://localhost:8787/produkty/trust-mys</URL>
+    <PRICE_VAT>12,90</PRICE_VAT>
+    <CATEGORYTEXT>Elektronika | Príslušenstvo</CATEGORYTEXT>
+  </SHOPITEM>
+  <SHOPITEM>
+    <ITEM_ID>MT-9999</ITEM_ID>
+    <PRODUCTNAME>Pokazená položka bez ceny</PRODUCTNAME>
+    <URL>http://localhost:8787/produkty/pokazena</URL>
+  </SHOPITEM>
+</SHOP>
