@@ -1,0 +1,48 @@
+# Produkčné nasadenie na VPS (fáza 9 roadmapy doplní CI/CD, zálohy a monitoring).
+# Spustenie: docker compose -f docker-compose.prod.yml up -d --build
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-app0}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?nastav v .env}
+      POSTGRES_DB: ${POSTGRES_DB:-app0}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-app0}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER:-app0}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-app0}
+      ADMIN_USER: ${ADMIN_USER}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+      NEXT_PUBLIC_APP_NAME: ${NEXT_PUBLIC_APP_NAME:-App0}
+    ports:
+      - "3000:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  worker:
+    build:
+      context: .
+      dockerfile: apps/worker/Dockerfile
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER:-app0}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-app0}
+      FEED_FETCH_CONTACT: ${FEED_FETCH_CONTACT}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  pgdata:

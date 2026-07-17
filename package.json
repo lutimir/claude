@@ -1,0 +1,21 @@
+{
+  "name": "app0",
+  "private": true,
+  "version": "0.1.0",
+  "packageManager": "pnpm@10.33.0",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "pnpm --filter @app0/web dev",
+    "build": "pnpm -r build",
+    "typecheck": "pnpm -r typecheck",
+    "test": "pnpm -r test",
+    "db:generate": "pnpm --filter @app0/db db:generate",
+    "db:migrate": "pnpm --filter @app0/db db:migrate",
+    "db:seed": "pnpm --filter @app0/db db:seed",
+    "worker": "pnpm --filter @app0/worker start",
+    "import:feeds": "pnpm --filter @app0/worker run import:feeds",
+    "alerts:check": "pnpm --filter @app0/worker run alerts:check"
+  }
+}
