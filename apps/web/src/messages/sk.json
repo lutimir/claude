@@ -1,0 +1,94 @@
+{
+  "common": {
+    "tagline": "Porovnávač cien elektroniky pre Slovensko a Česko",
+    "searchPlaceholder": "Hľadaj produkt, značku alebo EAN…",
+    "search": "Hľadať",
+    "fromPrice": "od {price}",
+    "noOffers": "momentálne bez ponuky",
+    "offersCount": "{count, plural, =0 {žiadna ponuka} one {# ponuka} few {# ponuky} other {# ponúk}}",
+    "toShop": "Do obchodu",
+    "backHome": "Späť na úvod"
+  },
+  "home": {
+    "heroTitle": "Nájdi najlepšiu cenu elektroniky",
+    "heroSubtitle": "Porovnávame ceny z oficiálnych feedov obchodov — legálne, transparentne a s históriou cien.",
+    "statsProducts": "produktov",
+    "statsOffers": "ponúk",
+    "statsShops": "obchodov",
+    "categories": "Kategórie",
+    "latestProducts": "Najnovšie v katalógu"
+  },
+  "search": {
+    "title": "Výsledky hľadania",
+    "resultsFor": "Výsledky pre „{query}“",
+    "noResults": "Nič sme nenašli. Skús iný výraz alebo EAN kód.",
+    "empty": "Zadaj, čo hľadáš."
+  },
+  "product": {
+    "offersTitle": "Ponuky obchodov",
+    "noOffers": "Tento produkt momentálne nemá aktívnu ponuku.",
+    "shop": "Obchod",
+    "availability": "Dostupnosť",
+    "availabilityInStock": "skladom",
+    "availabilityDays": "{days, plural, one {do # dňa} other {do # dní}}",
+    "price": "Cena",
+    "params": "Parametre",
+    "ean": "EAN",
+    "historyTitle": "Vývoj najnižšej ceny (90 dní)",
+    "historyEmpty": "História cien sa ešte len zbiera.",
+    "alertTitle": "Strážiť cenu",
+    "alertDescription": "Pošleme ti e-mail, keď cena klesne pod tvoju hranicu.",
+    "alertEmail": "Tvoj e-mail",
+    "alertTargetPrice": "Cieľová cena (€)",
+    "alertSubmit": "Nastaviť alarm",
+    "alertSuccess": "Alarm uložený! (Potvrdzovací e-mail doplní fáza 3 roadmapy.)",
+    "alertError": "Alarm sa nepodarilo uložiť — skontroluj e-mail a cenu."
+  },
+  "category": {
+    "empty": "V tejto kategórii zatiaľ nie sú produkty."
+  },
+  "notFound": {
+    "title": "Stránka neexistuje",
+    "text": "Skús vyhľadávanie alebo sa vráť na úvod."
+  },
+  "footer": {
+    "legalNote": "Ceny preberáme výhradne z oficiálnych feedov a API so súhlasom obchodov. Žiadny scraping bez povolenia.",
+    "terms": "Podmienky používania",
+    "privacy": "Ochrana súkromia",
+    "admin": "Administrácia"
+  },
+  "admin": {
+    "title": "Administrácia",
+    "overview": "Prehľad",
+    "shops": "Obchody a feedy",
+    "imports": "Importy",
+    "statProducts": "Produkty",
+    "statOffers": "Aktívne ponuky",
+    "statUnmatched": "Nespárované ponuky",
+    "statAlerts": "Cenové alarmy",
+    "lastImports": "Posledné importy",
+    "noRuns": "Zatiaľ neprebehol žiadny import. Spusti ho príkazom: pnpm import:feeds",
+    "runStatus": "Stav",
+    "runStarted": "Spustený",
+    "runItems": "Položky",
+    "runCreatedUpdated": "Nové / aktualizované",
+    "runWarnings": "Varovania",
+    "runError": "Chyba",
+    "shopName": "Obchod",
+    "shopCountry": "Krajina",
+    "shopLegalBasis": "Právny základ",
+    "feedUrl": "Feed",
+    "feedEnabled": "Zapnutý",
+    "feedConsent": "Súhlas potvrdený",
+    "feedLastRun": "Posledný import",
+    "yes": "áno",
+    "no": "nie",
+    "legalBasis_feed_consent": "feed so súhlasom obchodu",
+    "legalBasis_official_api": "oficiálne API",
+    "legalBasis_written_permission": "písomné povolenie"
+  },
+  "legal": {
+    "termsTitle": "Podmienky používania",
+    "privacyTitle": "Ochrana súkromia"
+  }
+}
