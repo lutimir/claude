@@ -10,6 +10,7 @@ import {
   numeric,
   pgEnum,
   pgTable,
+  real,
   serial,
   text,
   timestamp,
@@ -222,6 +223,50 @@ export const priceHistory = pgTable(
 );
 
 /**
+ * Kandidáti fuzzy párovania — pre nespárované ponuky ich navrhuje worker
+ * cez pg_trgm similarity nad normalizovanými názvami. Admin ich potvrdzuje
+ * alebo zamieta vo fronte /admin/parovanie.
+ */
+export const matchCandidates = pgTable(
+  "match_candidates",
+  {
+    id: serial("id").primaryKey(),
+    offerId: integer("offer_id")
+      .notNull()
+      .references(() => offers.id, { onDelete: "cascade" }),
+    productId: integer("product_id")
+      .notNull()
+      .references(() => products.id, { onDelete: "cascade" }),
+    /** similarity() skóre 0–1 */
+    score: real("score").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    uniqueIndex("match_candidates_pair_idx").on(t.offerId, t.productId),
+    index("match_candidates_offer_idx").on(t.offerId),
+  ],
+);
+
+/**
+ * Blocklist zamietnutých párov — učenie sa z manuálnych rozhodnutí.
+ * Zamietnutý pár sa už nikdy nenavrhne znova.
+ */
+export const matchRejections = pgTable(
+  "match_rejections",
+  {
+    id: serial("id").primaryKey(),
+    offerId: integer("offer_id")
+      .notNull()
+      .references(() => offers.id, { onDelete: "cascade" }),
+    productId: integer("product_id")
+      .notNull()
+      .references(() => products.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [uniqueIndex("match_rejections_pair_idx").on(t.offerId, t.productId)],
+);
+
+/**
  * Denné agregácie cien na produkt a menu — zdroj pre grafy a výpočet
  * "bežnej ceny" (detekcia falošných zliav). Píše ich worker: snapshot
  * z aktívnych ponúk po importe + backfill z price_history.
@@ -343,6 +388,17 @@ export const offersRelations = relations(offers, ({ one, many }) => ({
   shop: one(shops, { fields: [offers.shopId], references: [shops.id] }),
   feed: one(feeds, { fields: [offers.feedId], references: [feeds.id] }),
   history: many(priceHistory),
+  matchCandidates: many(matchCandidates),
+}));
+
+export const matchCandidatesRelations = relations(matchCandidates, ({ one }) => ({
+  offer: one(offers, { fields: [matchCandidates.offerId], references: [offers.id] }),
+  product: one(products, { fields: [matchCandidates.productId], references: [products.id] }),
+}));
+
+export const matchRejectionsRelations = relations(matchRejections, ({ one }) => ({
+  offer: one(offers, { fields: [matchRejections.offerId], references: [offers.id] }),
+  product: one(products, { fields: [matchRejections.productId], references: [products.id] }),
 }));
 
 export const priceHistoryRelations = relations(priceHistory, ({ one }) => ({

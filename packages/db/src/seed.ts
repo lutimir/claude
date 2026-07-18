@@ -27,8 +27,9 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 async function main() {
   console.log("Mažem existujúce dáta…");
   await db.execute(sql`
-    TRUNCATE shop_reviews, price_alerts, product_price_daily, price_history,
-      offers, import_jobs, feed_runs, products, categories, brands, feeds, shops
+    TRUNCATE shop_reviews, price_alerts, match_candidates, match_rejections,
+      product_price_daily, price_history, offers, import_jobs, feed_runs,
+      products, categories, brands, feeds, shops
     RESTART IDENTITY CASCADE
   `);
 
