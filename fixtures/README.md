@@ -27,6 +27,8 @@ SQL
 pnpm import:feeds
 ```
 
-Očakávaný výsledok: 5 položiek naimportovaných, 1 varovanie (položka bez ceny),
-3 ponuky spárované s existujúcimi produktmi cez EAN, 1 nový produkt (JBL),
-1 nespárovaná ponuka (bez EAN — čaká na fuzzy párovanie z fázy 4).
+Očakávaný výsledok: 8 položiek naimportovaných, 1 varovanie (položka bez ceny),
+3 ponuky spárované s existujúcimi produktmi cez EAN, 1 nový produkt (JBL)
+a 4 ponuky bez EAN pre fuzzy párovanie: MT-4001 (názov identický s produktom)
+sa spáruje automaticky, MT-4002 a MT-4003 dostanú kandidátov do fronty
+/admin/parovanie a MT-3001 (Trust) zostane bez kandidátov.

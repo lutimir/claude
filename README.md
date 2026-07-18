@@ -64,6 +64,7 @@ Admin sekcia: `http://localhost:3000/admin` (HTTP Basic — `ADMIN_USER` / `ADMI
 | `pnpm db:migrate`   | aplikuje migrácie                                  |
 | `pnpm db:seed`      | demo dáta vrátane denných agregácií (deštruktívne!) |
 | `pnpm --filter @app0/worker run aggregate` | prepočet dnešných cenových agregátov |
+| `pnpm --filter @app0/worker exec tsx src/cli.ts match-candidates` | fuzzy párovanie nespárovaných ponúk |
 | `pnpm test`         | unit testy (vitest)                                |
 | `pnpm typecheck`    | typová kontrola celého monorepa                    |
 | `pnpm build`        | produkčný build                                    |

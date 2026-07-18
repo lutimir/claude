@@ -58,24 +58,17 @@ re-arm → zrušenie → rate limit.
 
 ---
 
-## ⬜ Fáza 4 — Fuzzy párovanie a fronta párovania
+## ✅ Fáza 4 — Fuzzy párovanie a fronta párovania (hotová)
 
-**Cieľ:** spárovať ponuky bez EAN.
-**Rozsah:** pg_trgm similarity nad normalizovanými názvami (immutable_unaccent
-a trigram index už existujú), kandidáti s confidence skóre, automatické párovanie
-nad prahom, admin fronta na ručné potvrdenie (match_status matched_fuzzy /
-matched_manual už v schéme), učenie sa z manuálnych rozhodnutí (blocklist párov).
-**Hotové keď:** nespárované ponuky dostávajú kandidátov a admin ich vie potvrdiť.
-
-**Prompt:**
-```text
-Pokračuj v projekte App0 (pozri README.md a ROADMAP.md — Fáza 4). Vybuduj fuzzy
-párovanie ponúk bez EAN: pg_trgm similarity nad normalizovanými názvami (unaccent
-aj trigram index už sú v migráciách), návrhy kandidátov s confidence skóre po
-importe, automatické spárovanie nad konfigurovateľným prahom a admin frontu na
-ručné potvrdenie/zamietnutie zvyšku. Využi match_status hodnoty matched_fuzzy a
-matched_manual zo schémy. Po dokončení aktualizuj ROADMAP.md a commitni.
-```
+Worker po každom importe navrhuje kandidátov pre nespárované ponuky: skóre =
+greatest(similarity, word_similarity) nad unaccent+lower názvami — word_similarity
+zvláda dlhé názvy ponúk s "omáčkou" okolo názvu produktu. Auto-párovanie
+(matched_fuzzy) len pri prísnej plnej similarity ≥ 0.85 (prahy konfigurovateľné
+cez FUZZY_AUTO_THRESHOLD / FUZZY_CANDIDATE_THRESHOLD). Admin fronta
+/admin/parovanie: kandidáti so skóre v %, Spárovať (matched_manual) / Zamietnuť
+(blocklist match_rejections — pár sa už nikdy nenavrhne). Trigram index nad
+normalizovanými názvami, CLI match-candidates. Overené E2E vrátane blocklistu
+po opakovanom behu.
 
 ---
 

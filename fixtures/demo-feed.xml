@@ -64,6 +64,30 @@
     <CATEGORYTEXT>Elektronika | Príslušenstvo</CATEGORYTEXT>
   </SHOPITEM>
   <SHOPITEM>
+    <ITEM_ID>MT-4001</ITEM_ID>
+    <PRODUCTNAME>Sony WH-1000XM5 čierne</PRODUCTNAME>
+    <URL>http://localhost:8787/produkty/sony-xm5-bez-ean</URL>
+    <PRICE_VAT>322,00</PRICE_VAT>
+    <MANUFACTURER>Sony</MANUFACTURER>
+    <CATEGORYTEXT>Elektronika | Slúchadlá</CATEGORYTEXT>
+  </SHOPITEM>
+  <SHOPITEM>
+    <ITEM_ID>MT-4002</ITEM_ID>
+    <PRODUCTNAME>Apple iPhone 15 s pamäťou 128GB vo farbe modrej, nový kus</PRODUCTNAME>
+    <URL>http://localhost:8787/produkty/iphone-15-bez-ean</URL>
+    <PRICE_VAT>789,00</PRICE_VAT>
+    <MANUFACTURER>Apple</MANUFACTURER>
+    <CATEGORYTEXT>Elektronika | Mobilné telefóny</CATEGORYTEXT>
+  </SHOPITEM>
+  <SHOPITEM>
+    <ITEM_ID>MT-4003</ITEM_ID>
+    <PRODUCTNAME>Samsung televízor QLED rady Q70D s uhlopriečkou 55 palcov</PRODUCTNAME>
+    <URL>http://localhost:8787/produkty/qled-q70d-bez-ean</URL>
+    <PRICE_VAT>735,00</PRICE_VAT>
+    <MANUFACTURER>Samsung</MANUFACTURER>
+    <CATEGORYTEXT>Elektronika | Televízory</CATEGORYTEXT>
+  </SHOPITEM>
+  <SHOPITEM>
     <ITEM_ID>MT-9999</ITEM_ID>
     <PRODUCTNAME>Pokazená položka bez ceny</PRODUCTNAME>
     <URL>http://localhost:8787/produkty/pokazena</URL>
