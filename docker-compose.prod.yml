@@ -30,6 +30,7 @@ services:
       MAIL_FROM: ${MAIL_FROM}
       RESEND_API_KEY: ${RESEND_API_KEY}
       SMTP_URL: ${SMTP_URL}
+      REVALIDATE_SECRET: ${REVALIDATE_SECRET}
     ports:
       - "3000:3000"
     depends_on:
@@ -44,11 +45,12 @@ services:
     environment:
       DATABASE_URL: postgres://${POSTGRES_USER:-app0}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-app0}
       FEED_FETCH_CONTACT: ${FEED_FETCH_CONTACT}
-      APP_BASE_URL: ${APP_BASE_URL}
+      APP_BASE_URL: ${APP_BASE_URL:-http://web:3000}
       MAIL_PROVIDER: ${MAIL_PROVIDER:-console}
       MAIL_FROM: ${MAIL_FROM}
       RESEND_API_KEY: ${RESEND_API_KEY}
       SMTP_URL: ${SMTP_URL}
+      REVALIDATE_SECRET: ${REVALIDATE_SECRET}
     depends_on:
       postgres:
         condition: service_healthy

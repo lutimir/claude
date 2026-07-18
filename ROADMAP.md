@@ -99,22 +99,17 @@ vrátane honeypotu a zamietnutia).
 
 ---
 
-## ⬜ Fáza 7 — SEO a výkon
+## ✅ Fáza 7 — SEO a výkon (hotová)
 
-**Cieľ:** organická návštevnosť a rýchlosť.
-**Rozsah:** sitemap.xml, štruktúrované dáta (Product + Offer schema.org),
-canonical URL, OpenGraph, ISR/cache stratégia namiesto force-dynamic, indexy podľa
-EXPLAIN, stránkovanie kategórií a vyhľadávania.
-**Hotové keď:** Lighthouse SEO 100, produktové stránky majú validné štruktúrované dáta.
-
-**Prompt:**
-```text
-Pokračuj v projekte App0 (pozri README.md a ROADMAP.md — Fáza 7). Optimalizuj SEO
-a výkon: sitemap.xml generovaná z DB, schema.org Product/Offer/AggregateOffer JSON-LD
-na detailoch produktov, canonical URL a OpenGraph, prechod z force-dynamic na ISR
-s revalidáciou po importe, stránkovanie kategórií a vyhľadávania, kontrola query
-plánov a doplnenie indexov. Po dokončení aktualizuj ROADMAP.md a commitni.
-```
+sitemap.xml a robots.txt generované z DB (produkty, kategórie, obchody; /admin,
+/alarm, /recenzia, /hladat mimo indexu), metadataBase + canonical + OpenGraph
+na všetkých verejných stránkach, JSON-LD na detaile produktu (Product s gtin13,
+Brand a AggregateOffer + BreadcrumbList), vyhľadávanie noindex. Cache vrstva:
+katalógové dotazy cez unstable_cache (TTL 5 min, tag "catalog") — hlavný dotaz
+produktu s ponukami ostáva live (čerstvé ceny); worker invaliduje cache po
+importe cez POST /api/revalidate (REVALIDATE_SECRET). Stránkovanie kategórií
+aj vyhľadávania (?strana, limit+1 bez COUNT). ILIKE zladené s trigram indexom
+(lower + LIKE). Overené E2E (16 kontrol vrátane validného JSON-LD).
 
 ---
 
@@ -202,7 +197,8 @@ priamy link), reporting preklikov v admine a korektné označenie komerčných o
   prejsť na dávkové upserty (fáza 1 alebo 2).
 - Vyhľadávanie pokrýva len názov produktu — rozšíriť o značku, kategóriu
   a popis (fáza 7).
-- Web build používa `force-dynamic` — zámerné pre kostru, rieši fáza 7 (ISR).
+- Stránky sú dynamické s cachovanou dátovou vrstvou (TTL + tag invalidácia);
+  plný ISR/PPR by vyžadoval DB pri builde — zvážiť pri fáze 9 (deploy).
 - Kategórie sa z feedov zakladajú ploché (najhlbší segment) — strom rieši fáza 1.
 - E-maily sú konzolový stub — rieši fáza 3.
 - `pnpm audit` spúšťať priebežne; verzie závislostí sú pinnuté v pnpm-lock.yaml.
