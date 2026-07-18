@@ -113,23 +113,17 @@ aj vyhľadávania (?strana, limit+1 bez COUNT). ILIKE zladené s trigram indexom
 
 ---
 
-## ⬜ Fáza 8 — Český trh
+## ✅ Fáza 8 — Český trh (hotová)
 
-**Cieľ:** plná CZ verzia.
-**Rozsah:** čeština (druhý messages súbor + locale routing v next-intl), CZK ceny
-naprieč webom (agregácie per mena — teraz sa agreguje len EUR), prepínač
-krajiny/meny, CZ obchody.
-**Hotové keď:** web beží v SK aj CZ verzii s korektnými menami.
-
-**Prompt:**
-```text
-Pokračuj v projekte App0 (pozri README.md a ROADMAP.md — Fáza 8). Rozšír appku na
-český trh: pridaj cs preklady a locale routing do next-intl (messages sú už oddelené
-v apps/web/src/messages), zaveď menu ako prvotriedny koncept v dopytoch (min ceny
-a história per mena — teraz je natvrdo EUR), prepínač krajiny v hlavičke a podporu
-CZ obchodov (currency CZK už je v schéme). Po dokončení aktualizuj ROADMAP.md
-a commitni.
-```
+Locale routing next-intl (sk bez prefixu, /cs pre češtinu; localePrefix
+as-needed), kompletné cs.json preklady (admin ostáva zámerne po slovensky),
+kombinovaný middleware (Basic auth pre /admin + intl routing), prepínač SK/CZ
+v hlavičke. Mena je prvotriedny parameter: sk→EUR, cs→CZK naprieč kartami,
+vyhľadávaním, kategóriami, poklesmi cien, grafom, bežnou cenou aj cenovými
+alarmami (alarm nesie menu, formulár ju posiela). CZK sa formátuje cez cs-CZ
+("Kč"). JSON-LD nesie menu podľa locale, hreflang sk/cs, sitemap obsahuje
+obe verzie. Seed má český demo obchod (TechArena.cz, CZK ceny + história).
+Overené E2E (19 kontrol).
 
 ---
 
