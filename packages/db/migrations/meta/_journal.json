@@ -43,6 +43,13 @@
       "when": 1784392893944,
       "tag": "0005_fuzzy_match_index",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1784395135834,
+      "tag": "0006_fat_leader",
+      "breakpoints": true
     }
   ]
 }

@@ -290,6 +290,17 @@ export const productPriceDaily = pgTable(
   ],
 );
 
+/**
+ * Číselník aliasov názvov parametrov — rôzne obchody volajú ten istý
+ * parameter rôzne ("Úložisko" vs "Pamäť"). Alias je normalizovaný
+ * (lower, bez diakritiky), canonical je zobrazovaný názov.
+ */
+export const paramAliases = pgTable("param_aliases", {
+  id: serial("id").primaryKey(),
+  alias: text("alias").notNull().unique(),
+  canonical: text("canonical").notNull(),
+});
+
 // ---------------------------------------------------------------------------
 // Cenové alarmy a recenzie (UI prichádza vo fázach 3 a 6)
 // ---------------------------------------------------------------------------

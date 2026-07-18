@@ -28,8 +28,8 @@ async function main() {
   console.log("Mažem existujúce dáta…");
   await db.execute(sql`
     TRUNCATE shop_reviews, price_alerts, match_candidates, match_rejections,
-      product_price_daily, price_history, offers, import_jobs, feed_runs,
-      products, categories, brands, feeds, shops
+      param_aliases, product_price_daily, price_history, offers, import_jobs,
+      feed_runs, products, categories, brands, feeds, shops
     RESTART IDENTITY CASCADE
   `);
 
@@ -313,6 +313,15 @@ async function main() {
       historyCount += historyRows.length;
     }
   }
+
+  console.log("Vkladám aliasy parametrov…");
+  await db.insert(schema.paramAliases).values([
+    { alias: "ulozisko", canonical: "Pamäť" },
+    { alias: "kapacita uloziska", canonical: "Pamäť" },
+    { alias: "obrazovka", canonical: "Displej" },
+    { alias: "uhlopriecka displeja", canonical: "Uhlopriečka" },
+    { alias: "vydrz na baterku", canonical: "Výdrž batérie" },
+  ]);
 
   console.log("Počítam denné agregácie cien…");
   await backfillAggregatesFromHistory(db);
