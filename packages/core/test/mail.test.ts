@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { createMailer } from "../src/mail/factory";
-import { buildAlertConfirmationEmail, buildPriceDropEmail } from "../src/mail/templates";
+import {
+  buildAlertConfirmationEmail,
+  buildPriceDropEmail,
+  buildReviewVerificationEmail,
+} from "../src/mail/templates";
 
 describe("createMailer", () => {
   it("bez konfigurácie vráti console mailer", () => {
@@ -39,6 +43,15 @@ describe("šablóny e-mailov", () => {
     expect(mail.subject).toContain("Sony WH-1000XM5");
     expect(mail.text).toContain("300.00 EUR");
     expect(mail.text).toContain("https://app0.sk/alarm/tok-1?akcia=potvrdit");
+  });
+
+  it("overenie recenzie obsahuje obchod a odkaz", () => {
+    const mail = buildReviewVerificationEmail({
+      shopName: "TechMarket",
+      verifyUrl: "https://app0.sk/recenzia/tok-9",
+    });
+    expect(mail.subject).toContain("TechMarket");
+    expect(mail.text).toContain("https://app0.sk/recenzia/tok-9");
   });
 
   it("notifikácia o poklese obsahuje ponuku aj správu alarmu", () => {

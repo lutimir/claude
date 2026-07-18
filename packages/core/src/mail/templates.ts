@@ -23,6 +23,27 @@ export function buildAlertConfirmationEmail(params: AlertConfirmationParams): {
   };
 }
 
+export interface ReviewVerificationParams {
+  shopName: string;
+  verifyUrl: string;
+}
+
+export function buildReviewVerificationEmail(params: ReviewVerificationParams): {
+  subject: string;
+  text: string;
+} {
+  return {
+    subject: `Potvrď svoje hodnotenie obchodu ${params.shopName}`,
+    text:
+      `Ahoj,\n\n` +
+      `napísal(a) si hodnotenie obchodu ${params.shopName}. Aby sme mali istotu, ` +
+      `že hodnotenia píšu skutoční ľudia, potvrď ho kliknutím na tento odkaz:\n` +
+      `${params.verifyUrl}\n\n` +
+      `Po overení hodnotenie skontroluje moderátor a následne sa zverejní.\n\n` +
+      `Ak si hodnotenie nepísal(a) ty, tento e-mail ignoruj — nič sa nezverejní.\n`,
+  };
+}
+
 export interface PriceDropParams {
   productName: string;
   price: string;
