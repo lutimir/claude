@@ -3,6 +3,7 @@ import { eq, sql } from "drizzle-orm";
 import { log } from "../lib/log";
 import { findMatchCandidates } from "./findMatchCandidates";
 import { importAllFeeds, importFeedById } from "./importFeeds";
+import { pingRevalidate } from "../lib/revalidate";
 
 const MAX_JOBS_PER_TICK = 5;
 
@@ -36,6 +37,7 @@ export async function processImportJobs(db: Db): Promise<void> {
       }
       await findMatchCandidates(db);
       await snapshotTodayAggregates(db);
+      await pingRevalidate();
       await db
         .update(schema.importJobs)
         .set({ status: "success", finishedAt: new Date() })

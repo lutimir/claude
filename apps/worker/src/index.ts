@@ -7,6 +7,7 @@ import { findMatchCandidates } from "./jobs/findMatchCandidates";
 import { importAllFeeds } from "./jobs/importFeeds";
 import { processImportJobs } from "./jobs/processImportJobs";
 import { log } from "./lib/log";
+import { pingRevalidate } from "./lib/revalidate";
 
 const db = createDb();
 
@@ -31,6 +32,7 @@ new Cron("0 3 * * *", { timezone: "Europe/Bratislava" }, () => {
     .then(() => findMatchCandidates(db))
     .then(() => snapshotTodayAggregates(db))
     .then(() => pruneOldPriceHistory(db))
+    .then(() => pingRevalidate())
     .catch((err) => log(`Denný import zlyhal: ${err}`));
 });
 
