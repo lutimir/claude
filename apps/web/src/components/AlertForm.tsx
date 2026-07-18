@@ -16,9 +16,19 @@ export async function AlertForm({ productId, slug, status }: AlertFormProps) {
     <section className="rounded-xl border border-neutral-200 bg-white p-4 dark:border-neutral-800 dark:bg-neutral-900">
       <h2 className="font-semibold">{t("alertTitle")}</h2>
       <p className="mt-1 text-sm text-neutral-500">{t("alertDescription")}</p>
-      {status === "ok" ? (
+      {status === "skontroluj" ? (
         <p className="mt-2 text-sm font-medium text-emerald-700 dark:text-emerald-400">
-          {t("alertSuccess")}
+          {t("alertCheckEmail")}
+        </p>
+      ) : null}
+      {status === "aktualizovane" ? (
+        <p className="mt-2 text-sm font-medium text-emerald-700 dark:text-emerald-400">
+          {t("alertUpdated")}
+        </p>
+      ) : null}
+      {status === "limit" ? (
+        <p className="mt-2 text-sm font-medium text-amber-700 dark:text-amber-400">
+          {t("alertLimit")}
         </p>
       ) : null}
       {status === "chyba" ? (

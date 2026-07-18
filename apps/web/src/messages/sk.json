@@ -51,8 +51,25 @@
     "alertEmail": "Tvoj e-mail",
     "alertTargetPrice": "Cieľová cena (€)",
     "alertSubmit": "Nastaviť alarm",
-    "alertSuccess": "Alarm uložený! (Potvrdzovací e-mail doplní fáza 3 roadmapy.)",
+    "alertCheckEmail": "Skoro hotovo — potvrď alarm kliknutím na odkaz v e-maile, ktorý sme ti poslali.",
+    "alertUpdated": "Alarm aktualizovaný — nová cieľová cena je uložená.",
+    "alertLimit": "Priveľa pokusov z tvojej adresy — skús to o chvíľu znova.",
     "alertError": "Alarm sa nepodarilo uložiť — skontroluj e-mail a cenu."
+  },
+  "alert": {
+    "title": "Cenový alarm",
+    "missing": "Alarm neexistuje alebo už bol zrušený.",
+    "cancelled": "Alarm bol zrušený. Tvoj e-mail sme vymazali.",
+    "confirmedMessage": "Alarm je potvrdený — strážime cenu a ozveme sa e-mailom.",
+    "product": "Produkt",
+    "targetPrice": "Cieľová cena",
+    "statusLabel": "Stav",
+    "statusPending": "čaká na potvrdenie e-mailu",
+    "statusActive": "aktívny — strážime cenu",
+    "statusNotified": "notifikácia odoslaná",
+    "confirm": "Potvrdiť alarm",
+    "rearm": "Strážiť znova",
+    "cancel": "Zrušiť alarm"
   },
   "category": {
     "empty": "V tejto kategórii zatiaľ nie sú produkty."
