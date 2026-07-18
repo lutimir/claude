@@ -31,24 +31,16 @@ obchod → feed → validácia → uloženie → import → produkt na webe.
 
 ---
 
-## ⬜ Fáza 2 — História cien naplno
+## ✅ Fáza 2 — História cien naplno (hotová)
 
-**Cieľ:** história cien ako hlavná pridaná hodnota.
-**Rozsah:** denné agregácie do samostatnej tabuľky (min/avg na produkt a deň),
-interaktívny graf (klientský komponent, tooltips, prepínač 30/90/365 dní),
-"najväčšie zľavy" sekcia na homepage, detekcia falošných zliav (porovnanie
-s 30-dňovým priemerom), retencia surových záznamov.
-**Hotové keď:** produkt má interaktívny graf a homepage ukazuje reálne poklesy cien.
-
-**Prompt:**
-```text
-Pokračuj v projekte App0 (pozri README.md a ROADMAP.md — Fáza 2). Vybuduj
-históriu cien naplno: agregačná tabuľka denných min/avg cien na produkt (počíta
-worker po importe), interaktívny graf na detaile produktu (prepínač 30/90/365 dní,
-tooltip s cenou a obchodom), sekcia "najväčšie poklesy cien" na homepage a výpočet
-férovej ceny (30-dňový priemer) na odhalenie falošných zliav. Po dokončení
-aktualizuj ROADMAP.md a commitni.
-```
+Tabuľka `product_price_daily` (denné min/avg/počet ponúk na produkt a menu) —
+snapshot po každom importe (cron aj manuálne joby), backfill z price_history
+(`aggregate-backfill`), retencia surových záznamov 400 dní (`prune-history`).
+Interaktívny SVG graf bez knižníc: tooltip (deň, najnižšia cena, priemer
+ponúk), prepínač 30/90/365 dní. "Bežná cena" = 30-dňový priemer denných miním
+(min. 5 dní dát) — detail produktu ukazuje % pod/nad bežnou cenou (detekcia
+falošných zliav), homepage sekciu "Najväčšie poklesy cien" s preškrtnutou
+bežnou cenou. Overené E2E cez Playwright.
 
 ---
 

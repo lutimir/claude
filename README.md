@@ -62,7 +62,8 @@ Admin sekcia: `http://localhost:3000/admin` (HTTP Basic — `ADMIN_USER` / `ADMI
 | `pnpm worker`       | worker s cron plánovačom (import denne o 03:00)    |
 | `pnpm db:generate`  | vygeneruje SQL migrácie zo zmien schémy            |
 | `pnpm db:migrate`   | aplikuje migrácie                                  |
-| `pnpm db:seed`      | demo dáta (deštruktívne!)                          |
+| `pnpm db:seed`      | demo dáta vrátane denných agregácií (deštruktívne!) |
+| `pnpm --filter @app0/worker run aggregate` | prepočet dnešných cenových agregátov |
 | `pnpm test`         | unit testy (vitest)                                |
 | `pnpm typecheck`    | typová kontrola celého monorepa                    |
 | `pnpm build`        | produkčný build                                    |
