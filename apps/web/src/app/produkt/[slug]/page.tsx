@@ -8,12 +8,12 @@ import { OffersTable } from "@/components/OffersTable";
 import { getDb } from "@/lib/db";
 import { formatPrice } from "@/lib/format";
 import {
-  getCompareSuggestions,
-  getDailyPrices,
-  getFairPriceInfo,
-  getProductBySlug,
-  getShopRatings,
-} from "@/lib/queries";
+  getCompareSuggestionsCached,
+  getDailyPricesCached,
+  getFairPriceInfoCached,
+  getShopRatingsCached,
+} from "@/lib/cachedQueries";
+import { getProductBySlug } from "@/lib/queries";
 
 export const dynamic = "force-dynamic";
 
@@ -27,7 +27,18 @@ interface ProductPageProps {
 export async function generateMetadata({ params }: ProductPageProps): Promise<Metadata> {
   const { slug } = await params;
   const product = await getProductBySlug(getDb(), slug);
-  return { title: product?.name ?? "Produkt" };
+  if (!product) return { title: "Produkt" };
+  const description = product.description ?? undefined;
+  return {
+    title: product.name,
+    description,
+    alternates: { canonical: `/produkt/${product.slug}` },
+    openGraph: {
+      title: product.name,
+      description,
+      ...(product.imageUrl ? { images: [product.imageUrl] } : {}),
+    },
+  };
 }
 
 export default async function ProductPage({ params, searchParams }: ProductPageProps) {
@@ -44,10 +55,10 @@ export default async function ProductPage({ params, searchParams }: ProductPageP
     ? Number(obdobie)
     : 90;
   const [history, fairPrice, compareSuggestions, shopRatings] = await Promise.all([
-    getDailyPrices(db, product.id, range),
-    getFairPriceInfo(db, product.id),
-    getCompareSuggestions(db, product.id, product.categoryId),
-    getShopRatings(db, [...new Set(product.offers.map((offer) => offer.shopId))]),
+    getDailyPricesCached(product.id, range),
+    getFairPriceInfoCached(product.id),
+    getCompareSuggestionsCached(product.id, product.categoryId),
+    getShopRatingsCached([...new Set(product.offers.map((offer) => offer.shopId))].sort()),
   ]);
   const eurPrices = product.offers
     .filter((offer) => offer.currency === "EUR")
@@ -59,8 +70,63 @@ export default async function ProductPage({ params, searchParams }: ProductPageP
       : null;
   const paramEntries = Object.entries(product.params);
 
+  const baseUrl = process.env.APP_BASE_URL ?? "http://localhost:3000";
+  const structuredData: object[] = [
+    {
+      "@context": "https://schema.org",
+      "@type": "Product",
+      name: product.name,
+      ...(product.description ? { description: product.description } : {}),
+      ...(product.imageUrl ? { image: product.imageUrl } : {}),
+      ...(product.brand ? { brand: { "@type": "Brand", name: product.brand.name } } : {}),
+      ...(product.ean ? { gtin13: product.ean } : {}),
+      ...(eurPrices.length > 0
+        ? {
+            offers: {
+              "@type": "AggregateOffer",
+              priceCurrency: "EUR",
+              lowPrice: Math.min(...eurPrices).toFixed(2),
+              highPrice: Math.max(...eurPrices).toFixed(2),
+              offerCount: eurPrices.length,
+              availability: "https://schema.org/InStock",
+            },
+          }
+        : {}),
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        { "@type": "ListItem", position: 1, name: "Domov", item: baseUrl },
+        ...(product.category
+          ? [
+              {
+                "@type": "ListItem",
+                position: 2,
+                name: product.category.name,
+                item: `${baseUrl}/kategoria/${product.category.slug}`,
+              },
+            ]
+          : []),
+        {
+          "@type": "ListItem",
+          position: product.category ? 3 : 2,
+          name: product.name,
+          item: `${baseUrl}/produkt/${product.slug}`,
+        },
+      ],
+    },
+  ];
+
   return (
     <div className="flex flex-col gap-8">
+      {structuredData.map((data, index) => (
+        <script
+          key={index}
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }}
+        />
+      ))}
       <nav className="text-sm text-neutral-500">
         <Link href="/" className="hover:text-neutral-900 dark:hover:text-neutral-100">
           {product.category?.name ? (

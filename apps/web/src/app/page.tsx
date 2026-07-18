@@ -2,24 +2,22 @@ import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { PriceDropCard } from "@/components/PriceDropCard";
 import { ProductGrid } from "@/components/ProductGrid";
-import { getDb } from "@/lib/db";
 import {
-  getCategoriesWithCounts,
-  getLatestProducts,
-  getStats,
-  getTopPriceDrops,
-} from "@/lib/queries";
+  getCategoriesWithCountsCached,
+  getLatestProductsCached,
+  getStatsCached,
+  getTopPriceDropsCached,
+} from "@/lib/cachedQueries";
 
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
   const t = await getTranslations("home");
-  const db = getDb();
   const [stats, categories, latestProducts, priceDrops] = await Promise.all([
-    getStats(db),
-    getCategoriesWithCounts(db),
-    getLatestProducts(db),
-    getTopPriceDrops(db, 4),
+    getStatsCached(),
+    getCategoriesWithCountsCached(),
+    getLatestProductsCached(8),
+    getTopPriceDropsCached(4),
   ]);
 
   const statItems = [

@@ -10,8 +10,15 @@ import "./globals.css";
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("common");
   return {
+    metadataBase: new URL(process.env.APP_BASE_URL ?? "http://localhost:3000"),
     title: { default: `${appName()} — ${t("tagline")}`, template: `%s · ${appName()}` },
     description: t("tagline"),
+    alternates: { canonical: "/" },
+    openGraph: {
+      siteName: appName(),
+      type: "website",
+      locale: "sk_SK",
+    },
   };
 }
 

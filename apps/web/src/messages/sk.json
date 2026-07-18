@@ -11,7 +11,10 @@
     "compareToggle": "Porovnať",
     "inCompare": "V porovnaní",
     "compareCta": "Porovnať produkty",
-    "clearCompare": "Zrušiť výber"
+    "clearCompare": "Zrušiť výber",
+    "prevPage": "Predchádzajúca",
+    "nextPage": "Ďalšia",
+    "pageIndicator": "strana {page}"
   },
   "compare": {
     "title": "Porovnanie produktov",

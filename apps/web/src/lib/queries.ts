@@ -54,7 +54,12 @@ export async function getLatestProducts(db: Db, limit = 8): Promise<ProductCardD
  * Full-text vyhľadávanie (bez diakritiky cez immutable_unaccent) s ILIKE
  * fallbackom na čiastočné zhody a presnou zhodou na EAN.
  */
-export async function searchProducts(db: Db, query: string, limit = 24): Promise<ProductCardData[]> {
+export async function searchProducts(
+  db: Db,
+  query: string,
+  limit = 24,
+  offset = 0,
+): Promise<ProductCardData[]> {
   const pattern = `%${query}%`;
   return db
     .select(productCardSelect)
@@ -62,10 +67,11 @@ export async function searchProducts(db: Db, query: string, limit = 24): Promise
     .leftJoin(schema.brands, eq(schema.products.brandId, schema.brands.id))
     .leftJoin(schema.offers, eq(schema.offers.productId, schema.products.id))
     .where(
+      // LIKE nad lower() sedí s trigram indexom products_name_unaccent_trgm_idx
       sql`(
         to_tsvector('simple', immutable_unaccent(${schema.products.name}))
           @@ websearch_to_tsquery('simple', immutable_unaccent(${query}))
-        or immutable_unaccent(${schema.products.name}) ilike immutable_unaccent(${pattern})
+        or immutable_unaccent(lower(${schema.products.name})) like immutable_unaccent(lower(${pattern}))
         or ${schema.products.ean} = ${query}
       )`,
     )
@@ -77,7 +83,8 @@ export async function searchProducts(db: Db, query: string, limit = 24): Promise
       ) desc`,
       desc(schema.products.createdAt),
     )
-    .limit(limit);
+    .limit(limit)
+    .offset(offset);
 }
 
 export async function getCategoriesWithCounts(db: Db) {
@@ -102,7 +109,8 @@ export async function getCategoryBySlug(db: Db, slug: string) {
 export async function getProductsInCategory(
   db: Db,
   categoryId: number,
-  limit = 48,
+  limit = 24,
+  offset = 0,
 ): Promise<ProductCardData[]> {
   return db
     .select(productCardSelect)
@@ -112,7 +120,8 @@ export async function getProductsInCategory(
     .where(eq(schema.products.categoryId, categoryId))
     .groupBy(schema.products.id, schema.brands.name)
     .orderBy(asc(schema.products.name))
-    .limit(limit);
+    .limit(limit)
+    .offset(offset);
 }
 
 export async function getProductBySlug(db: Db, slug: string) {

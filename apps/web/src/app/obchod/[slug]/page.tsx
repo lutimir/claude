@@ -17,7 +17,10 @@ interface ShopPageProps {
 export async function generateMetadata({ params }: ShopPageProps): Promise<Metadata> {
   const { slug } = await params;
   const shop = await getShopBySlug(getDb(), slug);
-  return { title: shop?.name ?? "Obchod" };
+  return {
+    title: shop?.name ?? "Obchod",
+    alternates: { canonical: `/obchod/${slug}` },
+  };
 }
 
 const inputClass =

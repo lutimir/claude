@@ -1,31 +1,47 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
+import { Pagination } from "@/components/Pagination";
 import { ProductGrid } from "@/components/ProductGrid";
+import { getProductsInCategoryCached } from "@/lib/cachedQueries";
 import { getDb } from "@/lib/db";
-import { getCategoryBySlug, getProductsInCategory } from "@/lib/queries";
+import { getCategoryBySlug } from "@/lib/queries";
 
 export const dynamic = "force-dynamic";
 
+const PAGE_SIZE = Number(process.env.CATALOG_PAGE_SIZE ?? 24);
+
 interface CategoryPageProps {
   params: Promise<{ slug: string }>;
+  searchParams: Promise<{ strana?: string }>;
 }
 
 export async function generateMetadata({ params }: CategoryPageProps): Promise<Metadata> {
   const { slug } = await params;
   const category = await getCategoryBySlug(getDb(), slug);
-  return { title: category?.name ?? "Kategória" };
+  return {
+    title: category?.name ?? "Kategória",
+    alternates: { canonical: `/kategoria/${slug}` },
+  };
 }
 
-export default async function CategoryPage({ params }: CategoryPageProps) {
+export default async function CategoryPage({ params, searchParams }: CategoryPageProps) {
   const t = await getTranslations("category");
   const { slug } = await params;
+  const { strana } = await searchParams;
 
-  const db = getDb();
-  const category = await getCategoryBySlug(db, slug);
+  const page = Math.max(1, Number.parseInt(strana ?? "1", 10) || 1);
+  const category = await getCategoryBySlug(getDb(), slug);
   if (!category) notFound();
 
-  const products = await getProductsInCategory(db, category.id);
+  // limit+1: posledný záznam len signalizuje existenciu ďalšej strany
+  const productsPlusOne = await getProductsInCategoryCached(
+    category.id,
+    PAGE_SIZE + 1,
+    (page - 1) * PAGE_SIZE,
+  );
+  const hasNext = productsPlusOne.length > PAGE_SIZE;
+  const products = productsPlusOne.slice(0, PAGE_SIZE);
 
   return (
     <div className="flex flex-col gap-6">
@@ -35,6 +51,13 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
       ) : (
         <ProductGrid products={products} />
       )}
+      <Pagination
+        page={page}
+        hasNext={hasNext}
+        hrefForPage={(target) =>
+          target === 1 ? `/kategoria/${slug}` : `/kategoria/${slug}?strana=${target}`
+        }
+      />
     </div>
   );
 }
