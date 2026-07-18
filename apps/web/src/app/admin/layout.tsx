@@ -11,6 +11,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     { href: "/admin/obchody", label: t("shops") },
     { href: "/admin/importy", label: t("imports") },
     { href: "/admin/parovanie", label: t("matching") },
+    { href: "/admin/recenzie", label: t("reviews") },
   ];
   return (
     <NextIntlClientProvider messages={messages}>

@@ -12,6 +12,7 @@ import {
   getDailyPrices,
   getFairPriceInfo,
   getProductBySlug,
+  getShopRatings,
 } from "@/lib/queries";
 
 export const dynamic = "force-dynamic";
@@ -42,10 +43,11 @@ export default async function ProductPage({ params, searchParams }: ProductPageP
   const range = (CHART_RANGES as readonly number[]).includes(Number(obdobie))
     ? Number(obdobie)
     : 90;
-  const [history, fairPrice, compareSuggestions] = await Promise.all([
+  const [history, fairPrice, compareSuggestions, shopRatings] = await Promise.all([
     getDailyPrices(db, product.id, range),
     getFairPriceInfo(db, product.id),
     getCompareSuggestions(db, product.id, product.categoryId),
+    getShopRatings(db, [...new Set(product.offers.map((offer) => offer.shopId))]),
   ]);
   const eurPrices = product.offers
     .filter((offer) => offer.currency === "EUR")
@@ -110,7 +112,7 @@ export default async function ProductPage({ params, searchParams }: ProductPageP
         {product.offers.length === 0 ? (
           <p className="text-neutral-500">{t("noOffers")}</p>
         ) : (
-          <OffersTable offers={product.offers} />
+          <OffersTable offers={product.offers} shopRatings={shopRatings} />
         )}
       </section>
 

@@ -233,6 +233,61 @@ export async function getTopPriceDrops(db: Db, limit = 4): Promise<PriceDrop[]> 
 }
 
 // ---------------------------------------------------------------------------
+// Obchody a hodnotenia
+// ---------------------------------------------------------------------------
+
+export async function getShopBySlug(db: Db, slug: string) {
+  return db.query.shops.findFirst({
+    where: eq(schema.shops.slug, slug),
+    with: {
+      reviews: {
+        where: eq(schema.shopReviews.status, "approved"),
+        orderBy: [desc(schema.shopReviews.createdAt)],
+        limit: 20,
+        columns: { id: true, rating: true, text: true, createdAt: true },
+      },
+    },
+  });
+}
+
+export interface ShopRating {
+  avg: number;
+  count: number;
+}
+
+/** Agregovaný rating schválených recenzií pre množinu obchodov. */
+export async function getShopRatings(db: Db, shopIds: number[]): Promise<Record<number, ShopRating>> {
+  if (shopIds.length === 0) return {};
+  const rows = await db
+    .select({
+      shopId: schema.shopReviews.shopId,
+      avg: sql<string>`round(avg(${schema.shopReviews.rating}), 1)`,
+      count: count(),
+    })
+    .from(schema.shopReviews)
+    .where(and(eq(schema.shopReviews.status, "approved"), inArray(schema.shopReviews.shopId, shopIds)))
+    .groupBy(schema.shopReviews.shopId);
+  return Object.fromEntries(
+    rows.map((row) => [row.shopId, { avg: Number(row.avg), count: row.count }]),
+  );
+}
+
+/** Overené recenzie čakajúce na moderáciu + počet neoverených. */
+export async function getReviewsForModeration(db: Db) {
+  const pending = await db
+    .select({ review: schema.shopReviews, shopName: schema.shops.name })
+    .from(schema.shopReviews)
+    .innerJoin(schema.shops, eq(schema.shopReviews.shopId, schema.shops.id))
+    .where(and(eq(schema.shopReviews.status, "pending"), isNotNull(schema.shopReviews.verifiedAt)))
+    .orderBy(asc(schema.shopReviews.createdAt));
+  const [unverified] = await db
+    .select({ value: count() })
+    .from(schema.shopReviews)
+    .where(and(eq(schema.shopReviews.status, "pending"), isNull(schema.shopReviews.verifiedAt)));
+  return { pending, unverifiedCount: unverified!.value };
+}
+
+// ---------------------------------------------------------------------------
 // Admin
 // ---------------------------------------------------------------------------
 

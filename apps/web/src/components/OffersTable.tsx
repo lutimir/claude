@@ -1,5 +1,8 @@
+import Link from "next/link";
 import { getTranslations } from "next-intl/server";
+import { Stars } from "@/components/Stars";
 import { formatPrice } from "@/lib/format";
+import type { ShopRating } from "@/lib/queries";
 
 interface OfferRow {
   id: number;
@@ -7,10 +10,15 @@ interface OfferRow {
   currency: "EUR" | "CZK";
   url: string;
   availability: string | null;
-  shop: { name: string };
+  shop: { id: number; name: string; slug: string };
 }
 
-export async function OffersTable({ offers }: { offers: OfferRow[] }) {
+interface OffersTableProps {
+  offers: OfferRow[];
+  shopRatings?: Record<number, ShopRating>;
+}
+
+export async function OffersTable({ offers, shopRatings = {} }: OffersTableProps) {
   const t = await getTranslations("product");
   const tCommon = await getTranslations("common");
 
@@ -38,7 +46,22 @@ export async function OffersTable({ offers }: { offers: OfferRow[] }) {
               key={offer.id}
               className="border-b border-neutral-200 last:border-0 dark:border-neutral-800"
             >
-              <td className="px-4 py-3">{offer.shop.name}</td>
+              <td className="px-4 py-3">
+                <Link
+                  href={`/obchod/${offer.shop.slug}`}
+                  className="hover:text-emerald-700 dark:hover:text-emerald-400"
+                >
+                  {offer.shop.name}
+                </Link>
+                {shopRatings[offer.shop.id] ? (
+                  <span className="ml-2 whitespace-nowrap text-xs">
+                    <Stars rating={shopRatings[offer.shop.id]!.avg} />{" "}
+                    <span className="text-neutral-500">
+                      {shopRatings[offer.shop.id]!.avg.toLocaleString("sk-SK")}
+                    </span>
+                  </span>
+                ) : null}
+              </td>
               <td className="px-4 py-3 text-neutral-500">{availabilityLabel(offer.availability)}</td>
               <td
                 className={`px-4 py-3 text-right font-semibold ${

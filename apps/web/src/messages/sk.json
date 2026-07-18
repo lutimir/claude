@@ -89,6 +89,24 @@
   "category": {
     "empty": "V tejto kategórii zatiaľ nie sú produkty."
   },
+  "review": {
+    "title": "Hodnotenia obchodu",
+    "formTitle": "Napíš hodnotenie",
+    "formDescription": "Hodnotenie sa zverejní po overení e-mailu a schválení moderátorom. E-mail sa nezverejňuje.",
+    "rating": "Hodnotenie",
+    "text": "Skúsenosť s obchodom (nepovinné)",
+    "email": "Tvoj e-mail",
+    "submit": "Odoslať hodnotenie",
+    "checkEmail": "Skoro hotovo — potvrď hodnotenie kliknutím na odkaz v e-maile.",
+    "limit": "Priveľa hodnotení z tvojej adresy — skús to neskôr.",
+    "error": "Hodnotenie sa nepodarilo odoslať — skontroluj údaje.",
+    "empty": "Zatiaľ žiadne hodnotenia.",
+    "count": "{count, plural, one {# hodnotenie} few {# hodnotenia} other {# hodnotení}}",
+    "verifyTitle": "Overenie hodnotenia",
+    "verifyOk": "Hodnotenie je overené — po schválení moderátorom sa zverejní. Ďakujeme!",
+    "verifyMissing": "Odkaz je neplatný alebo hodnotenie už bolo spracované.",
+    "backToShop": "Späť na obchod"
+  },
   "notFound": {
     "title": "Stránka neexistuje",
     "text": "Skús vyhľadávanie alebo sa vráť na úvod."
@@ -177,7 +195,12 @@
     "matchingHint": "Kandidátov navrhuje similarity nad normalizovanými názvami (pg_trgm). Spárovať priradí ponuku k produktu; Zamietnuť pár natrvalo zablokuje a už sa nenavrhne.",
     "matchingNoCandidates": "Bez kandidátov — počkaj na ďalší beh párovania alebo doplnenie katalógu.",
     "matchingConfirm": "Spárovať",
-    "matchingReject": "Zamietnuť"
+    "matchingReject": "Zamietnuť",
+    "reviews": "Recenzie",
+    "reviewsEmpty": "Žiadne hodnotenia na moderáciu.",
+    "reviewsUnverified": "{count, plural, one {# hodnotenie čaká} few {# hodnotenia čakajú} other {# hodnotení čaká}} na overenie e-mailu.",
+    "approve": "Schváliť",
+    "reject": "Zamietnuť"
   },
   "legal": {
     "termsTitle": "Podmienky používania",
