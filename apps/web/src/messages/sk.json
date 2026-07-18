@@ -14,7 +14,8 @@
     "clearCompare": "Zrušiť výber",
     "prevPage": "Predchádzajúca",
     "nextPage": "Ďalšia",
-    "pageIndicator": "strana {page}"
+    "pageIndicator": "strana {page}",
+    "account": "Účet"
   },
   "compare": {
     "title": "Porovnanie produktov",
@@ -203,10 +204,30 @@
     "reviewsEmpty": "Žiadne hodnotenia na moderáciu.",
     "reviewsUnverified": "{count, plural, one {# hodnotenie čaká} few {# hodnotenia čakajú} other {# hodnotení čaká}} na overenie e-mailu.",
     "approve": "Schváliť",
-    "reject": "Zamietnuť"
+    "reject": "Zamietnuť",
+    "clicksTitle": "Prekliky na obchody (30 dní)"
   },
   "legal": {
     "termsTitle": "Podmienky používania",
     "privacyTitle": "Ochrana súkromia"
+  },
+  "account": {
+    "title": "Môj účet",
+    "loginTitle": "Prihlásenie",
+    "loginDescription": "Zadaj e-mail a pošleme ti prihlasovací odkaz — bez hesla.",
+    "email": "Tvoj e-mail",
+    "loginSubmit": "Poslať odkaz",
+    "checkEmail": "Odkaz odoslaný — skontroluj e-mail (platí 15 minút).",
+    "invalidLink": "Odkaz je neplatný alebo expiroval — vyžiadaj si nový.",
+    "limit": "Priveľa pokusov — skús o chvíľu.",
+    "error": "Nepodarilo sa — skontroluj e-mail.",
+    "logout": "Odhlásiť sa",
+    "favorites": "Obľúbené produkty",
+    "favoritesEmpty": "Zatiaľ žiadne obľúbené — pridaj ich na detaile produktu.",
+    "alerts": "Moje cenové alarmy",
+    "alertsEmpty": "Žiadne alarmy pre tento e-mail.",
+    "manageAlert": "Spravovať",
+    "addFavorite": "♡ Pridať do obľúbených",
+    "removeFavorite": "♥ Odobrať z obľúbených"
   }
 }

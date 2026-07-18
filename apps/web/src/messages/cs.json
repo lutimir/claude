@@ -14,7 +14,8 @@
     "clearCompare": "Zrušit výběr",
     "prevPage": "Předchozí",
     "nextPage": "Další",
-    "pageIndicator": "strana {page}"
+    "pageIndicator": "strana {page}",
+    "account": "Účet"
   },
   "home": {
     "heroTitle": "Najdi nejlepší cenu elektroniky",
@@ -203,10 +204,30 @@
     "reviewsEmpty": "Žiadne hodnotenia na moderáciu.",
     "reviewsUnverified": "{count, plural, one {# hodnotenie čaká} few {# hodnotenia čakajú} other {# hodnotení čaká}} na overenie e-mailu.",
     "approve": "Schváliť",
-    "reject": "Zamietnuť"
+    "reject": "Zamietnuť",
+    "clicksTitle": "Prekliky na obchody (30 dní)"
   },
   "legal": {
     "termsTitle": "Podmínky používání",
     "privacyTitle": "Ochrana soukromí"
+  },
+  "account": {
+    "title": "Můj účet",
+    "loginTitle": "Přihlášení",
+    "loginDescription": "Zadej e-mail a pošleme ti přihlašovací odkaz — bez hesla.",
+    "email": "Tvůj e-mail",
+    "loginSubmit": "Poslat odkaz",
+    "checkEmail": "Odkaz odeslán — zkontroluj e-mail (platí 15 minut).",
+    "invalidLink": "Odkaz je neplatný nebo vypršel — vyžádej si nový.",
+    "limit": "Příliš mnoho pokusů — zkus to za chvíli.",
+    "error": "Nepodařilo se — zkontroluj e-mail.",
+    "logout": "Odhlásit se",
+    "favorites": "Oblíbené produkty",
+    "favoritesEmpty": "Zatím žádné oblíbené — přidej je na detailu produktu.",
+    "alerts": "Moje cenová hlídání",
+    "alertsEmpty": "Žádná hlídání pro tento e-mail.",
+    "manageAlert": "Spravovat",
+    "addFavorite": "♡ Přidat do oblíbených",
+    "removeFavorite": "♥ Odebrat z oblíbených"
   }
 }

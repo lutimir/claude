@@ -64,3 +64,16 @@ export function buildPriceDropEmail(params: PriceDropParams): { subject: string;
       `Alarm môžeš spravovať alebo zrušiť tu:\n${params.manageUrl}\n`,
   };
 }
+
+export interface MagicLinkParams {
+  loginUrl: string;
+}
+
+export function buildMagicLinkEmail(params: MagicLinkParams): { subject: string; text: string } {
+  return {
+    subject: "Prihlásenie do App0",
+    text:
+      `Ahoj,\n\nprihlásiš sa kliknutím na tento odkaz (platí 15 minút):\n` +
+      `${params.loginUrl}\n\nAk si prihlásenie nevyžiadal(a) ty, e-mail ignoruj.\n`,
+  };
+}

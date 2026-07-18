@@ -72,7 +72,7 @@ export async function OffersTable({ offers, shopRatings = {} }: OffersTableProps
               </td>
               <td className="px-4 py-3 text-right">
                 <a
-                  href={offer.url}
+                  href={`/api/presmeruj/${offer.id}`}
                   target="_blank"
                   rel="nofollow sponsored noopener"
                   className="inline-block rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-emerald-700"

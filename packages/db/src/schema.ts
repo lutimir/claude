@@ -53,6 +53,55 @@ export const offerMatchStatusEnum = pgEnum("offer_match_status", [
 ]);
 
 export const reviewStatusEnum = pgEnum("review_status", ["pending", "approved", "rejected"]);
+export const userRoleEnum = pgEnum("user_role", ["user", "admin"]);
+
+// ---------------------------------------------------------------------------
+// Používatelia (fáza 10) a monetizácia (fáza 11)
+// ---------------------------------------------------------------------------
+
+export const users = pgTable("users", {
+  id: serial("id").primaryKey(),
+  email: text("email").notNull().unique(),
+  role: userRoleEnum("role").notNull().default("user"),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+/** Magic-link prihlasovacie tokeny (jednorazové, 15 min platnosť). */
+export const loginTokens = pgTable("login_tokens", {
+  token: text("token").primaryKey(),
+  email: text("email").notNull(),
+  expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+  usedAt: timestamp("used_at", { withTimezone: true }),
+});
+
+export const sessions = pgTable("sessions", {
+  token: text("token").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const favorites = pgTable(
+  "favorites",
+  {
+    id: serial("id").primaryKey(),
+    userId: integer("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+    productId: integer("product_id").notNull().references(() => products.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [uniqueIndex("favorites_pair_idx").on(t.userId, t.productId)],
+);
+
+/** Prekliky na obchody cez /api/presmeruj — základ affiliate reportingu. */
+export const clicks = pgTable(
+  "clicks",
+  {
+    id: bigserial("id", { mode: "number" }).primaryKey(),
+    offerId: integer("offer_id").notNull().references(() => offers.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index("clicks_offer_idx").on(t.offerId, t.createdAt)],
+);
 
 // ---------------------------------------------------------------------------
 // Obchody a feedy
@@ -67,6 +116,8 @@ export const shops = pgTable("shops", {
   status: shopStatusEnum("status").notNull().default("active"),
   legalBasis: legalBasisEnum("legal_basis").notNull(),
   contactEmail: text("contact_email"),
+  /** Affiliate deep-link šablóna s {url} placeholderom; null = priamy odkaz */
+  affiliateTemplate: text("affiliate_template"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
@@ -425,4 +476,22 @@ export const priceAlertsRelations = relations(priceAlerts, ({ one }) => ({
 
 export const shopReviewsRelations = relations(shopReviews, ({ one }) => ({
   shop: one(shops, { fields: [shopReviews.shopId], references: [shops.id] }),
+}));
+
+export const usersRelations = relations(users, ({ many }) => ({
+  sessions: many(sessions),
+  favorites: many(favorites),
+}));
+
+export const sessionsRelations = relations(sessions, ({ one }) => ({
+  user: one(users, { fields: [sessions.userId], references: [users.id] }),
+}));
+
+export const favoritesRelations = relations(favorites, ({ one }) => ({
+  user: one(users, { fields: [favorites.userId], references: [users.id] }),
+  product: one(products, { fields: [favorites.productId], references: [products.id] }),
+}));
+
+export const clicksRelations = relations(clicks, ({ one }) => ({
+  offer: one(offers, { fields: [clicks.offerId], references: [offers.id] }),
 }));

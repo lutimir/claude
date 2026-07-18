@@ -16,6 +16,12 @@ export async function Header() {
         <div className="min-w-56 flex-1">
           <SearchBox placeholder={t("searchPlaceholder")} buttonLabel={t("search")} />
         </div>
+        <Link
+          href="/ucet"
+          className="text-sm text-neutral-500 transition hover:text-emerald-700 dark:hover:text-emerald-400"
+        >
+          {t("account")}
+        </Link>
         <Suspense fallback={null}>
           <LocaleSwitcher />
         </Suspense>

@@ -57,6 +57,13 @@
       "when": 1784404614118,
       "tag": "0007_useful_logan",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1784407300093,
+      "tag": "0008_tiny_exiles",
+      "breakpoints": true
     }
   ]
 }

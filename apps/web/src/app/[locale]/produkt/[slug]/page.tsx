@@ -15,6 +15,10 @@ import {
 } from "@/lib/cachedQueries";
 import { currencyForLocale } from "@/lib/currency";
 import { getProductBySlug } from "@/lib/queries";
+import { getSessionUser } from "@/lib/auth";
+import { toggleFavorite } from "@/app/[locale]/ucet/actions";
+import { schema } from "@app0/db";
+import { and, eq } from "drizzle-orm";
 
 export const dynamic = "force-dynamic";
 
@@ -48,6 +52,7 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
 export default async function ProductPage({ params, searchParams }: ProductPageProps) {
   const t = await getTranslations("product");
   const tCompare = await getTranslations("compare");
+  const tAccount = await getTranslations("account");
   const { slug } = await params;
   const { alarm, obdobie } = await searchParams;
 
@@ -74,6 +79,14 @@ export default async function ProductPage({ params, searchParams }: ProductPageP
       ? Math.round((1 - currentMin / fairPrice.fairPrice) * 1000) / 10
       : null;
   const paramEntries = Object.entries(product.params);
+  const user = await getSessionUser();
+  const isFavorite = user
+    ? Boolean(
+        await db.query.favorites.findFirst({
+          where: and(eq(schema.favorites.userId, user.id), eq(schema.favorites.productId, product.id)),
+        }),
+      )
+    : false;
 
   const baseUrl = process.env.APP_BASE_URL ?? "http://localhost:3000";
   const structuredData: object[] = [
@@ -174,6 +187,22 @@ export default async function ProductPage({ params, searchParams }: ProductPageP
             <p className="mt-3 text-xs text-neutral-400">
               {t("ean")}: {product.ean}
             </p>
+          ) : null}
+          {user ? (
+            <form action={toggleFavorite} className="mt-3">
+              <input type="hidden" name="productId" value={product.id} />
+              <input type="hidden" name="slug" value={product.slug} />
+              <button
+                type="submit"
+                className={`rounded-lg border px-3 py-1.5 text-sm transition ${
+                  isFavorite
+                    ? "border-red-300 text-red-600 hover:bg-red-50 dark:border-red-800 dark:hover:bg-red-950"
+                    : "border-neutral-300 hover:border-emerald-500 hover:text-emerald-700 dark:border-neutral-700"
+                }`}
+              >
+                {isFavorite ? tAccount("removeFavorite") : tAccount("addFavorite")}
+              </button>
+            </form>
           ) : null}
         </div>
       </section>

@@ -1,14 +1,18 @@
 import { getTranslations } from "next-intl/server";
 import { getDb } from "@/lib/db";
 import { formatDateTime } from "@/lib/format";
-import { getAdminStats, getFeedRunsWithShops } from "@/lib/queries";
+import { getAdminStats, getClicksByShop, getFeedRunsWithShops } from "@/lib/queries";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminOverviewPage() {
   const t = await getTranslations("admin");
   const db = getDb();
-  const [stats, runs] = await Promise.all([getAdminStats(db), getFeedRunsWithShops(db, 10)]);
+  const [stats, runs, clickStats] = await Promise.all([
+    getAdminStats(db),
+    getFeedRunsWithShops(db, 10),
+    getClicksByShop(db),
+  ]);
 
   const statItems = [
     { label: t("statProducts"), value: stats.products },
@@ -30,6 +34,24 @@ export default async function AdminOverviewPage() {
           </div>
         ))}
       </dl>
+
+      {clickStats.length > 0 ? (
+        <section>
+          <h2 className="mb-3 text-lg font-semibold">{t("clicksTitle")}</h2>
+          <div className="overflow-x-auto rounded-xl border border-neutral-200 dark:border-neutral-800">
+            <table className="w-full text-sm">
+              <tbody>
+                {clickStats.map((row) => (
+                  <tr key={row.shopName} className="border-b border-neutral-200 last:border-0 dark:border-neutral-800">
+                    <td className="px-4 py-2.5">{row.shopName}</td>
+                    <td className="px-4 py-2.5 text-right font-semibold">{row.clicks}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      ) : null}
 
       <section>
         <h2 className="mb-3 text-lg font-semibold">{t("lastImports")}</h2>

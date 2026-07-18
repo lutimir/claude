@@ -27,7 +27,8 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 async function main() {
   console.log("Mažem existujúce dáta…");
   await db.execute(sql`
-    TRUNCATE shop_reviews, price_alerts, match_candidates, match_rejections,
+    TRUNCATE clicks, favorites, sessions, login_tokens, users,
+      shop_reviews, price_alerts, match_candidates, match_rejections,
       param_aliases, product_price_daily, price_history, offers, import_jobs,
       feed_runs, products, categories, brands, feeds, shops
     RESTART IDENTITY CASCADE
@@ -77,6 +78,7 @@ async function main() {
         country: "sk" as const,
         legalBasis: "feed_consent" as const,
         contactEmail: "feeds@techmarket.demo",
+        affiliateTemplate: "https://aff.demo.local/track?target={url}",
       },
       {
         name: "ElektroDom (demo)",

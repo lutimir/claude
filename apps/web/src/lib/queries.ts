@@ -323,6 +323,21 @@ export async function getReviewsForModeration(db: Db) {
 // Admin
 // ---------------------------------------------------------------------------
 
+/** Prekliky na obchody za posledných 30 dní (affiliate reporting). */
+export async function getClicksByShop(db: Db) {
+  return db
+    .select({
+      shopName: schema.shops.name,
+      clicks: count(schema.clicks.id),
+    })
+    .from(schema.clicks)
+    .innerJoin(schema.offers, eq(schema.clicks.offerId, schema.offers.id))
+    .innerJoin(schema.shops, eq(schema.offers.shopId, schema.shops.id))
+    .where(sql`${schema.clicks.createdAt} > now() - interval '30 days'`)
+    .groupBy(schema.shops.name)
+    .orderBy(desc(count(schema.clicks.id)));
+}
+
 export async function getAdminStats(db: Db) {
   const base = await getStats(db);
   const [unmatched] = await db

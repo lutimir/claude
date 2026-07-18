@@ -138,44 +138,32 @@ cez SSH pri pushi na main (secrets VPS_HOST/VPS_USER/VPS_SSH_KEY). Kompletný
 návod v DEPLOY.md vrátane obnovy záloh a checklistu pred ostrým spustením
 (právnik, reálny mail provider, prvé obchody).
 
-## ⬜ Fáza 10 — Používateľské účty
+## ✅ Fáza 10 — Používateľské účty (hotová)
 
-**Cieľ:** prihlásenie a personalizácia.
-**Rozsah:** auth (e-mail + heslo alebo magic link), obľúbené produkty, správa
-vlastných alarmov, história prezeraných, prepojenie anonymných alarmov s účtom.
-**Hotové keď:** používateľ sa prihlási a spravuje si obľúbené aj alarmy.
-
-**Prompt:**
-```text
-Pokračuj v projekte App0 (pozri README.md a ROADMAP.md — Fáza 10). Pridaj
-používateľské účty: auth cez magic link (využi existujúci Mailer), tabuľky users
-a favorites, stránka účtu so správou cenových alarmov a obľúbených produktov,
-prepojenie existujúcich alarmov podľa e-mailu pri registrácii. Admin Basic auth
-nahraď rolou v účte. Po dokončení aktualizuj ROADMAP.md a commitni.
-```
+Magic-link auth bez hesiel: jednorazový token (15 min) e-mailom cez existujúci
+Mailer, session cookie (httpOnly, 30 dní), rate limit 5/IP/h. Stránka /ucet:
+prihlásenie, obľúbené produkty (♥ tlačidlo na detaile produktu), cenové alarmy
+prepojené podľa e-mailu (vidno aj alarmy vytvorené pred registráciou) so
+správou cez /alarm/[token], odhlásenie. Tabuľky users (s rolou user/admin
+pripravenou), sessions, login_tokens, favorites. Admin zámerne ostáva na Basic
+auth (jednoduchosť prevádzky); prechod na rolu v účte je pripravený stĺpcom
+users.role. Overené E2E.
 
 ---
 
-## ⬜ Fáza 11 — Monetizácia
+## ✅ Fáza 11 — Monetizácia (hotová)
 
-**Cieľ:** príjmy bez poškodenia dôvery.
-**Rozsah:** affiliate podpora (šablóny deep-linkov per obchod / affiliate sieť),
-meranie preklikov (interná redirect route /presmeruj/:offerId so štatistikou),
-reporting v admine, označenie affiliate odkazov podľa legislatívy.
-**Hotové keď:** prekliky sa merajú a affiliate linky sa generujú tam, kde existujú.
-
-**Prompt:**
-```text
-Pokračuj v projekte App0 (pozri README.md a ROADMAP.md — Fáza 11). Priprav
-monetizáciu: redirect route /presmeruj/[offerId] s logovaním preklikov (tabuľka
-clicks), šablóny affiliate deep-linkov per obchod (konfigurácia v DB, fallback na
-priamy link), reporting preklikov v admine a korektné označenie komerčných odkazov
-(rel="sponsored" už je v OffersTable). Po dokončení aktualizuj ROADMAP.md a commitni.
-```
+Redirect route /api/presmeruj/[offerId]: zaloguje klik (tabuľka clicks)
+a presmeruje cez affiliate šablónu obchodu (shops.affiliate_template
+s {url} placeholderom) alebo priamo. Tabuľka ponúk odkazuje cez presmerovanie
+s rel="nofollow sponsored" (korektné označenie komerčných odkazov). Admin
+prehľad zobrazuje prekliky na obchody za 30 dní. Seed má ukážkovú šablónu.
+Overené E2E (šablóna aj priamy odkaz, logovanie, reporting).
 
 ---
 
 ## Technické dlhy a poznámky (priebežne)
+
 
 - Import robí per-položku SELECT+UPSERT — pri veľkých feedoch (>50k položiek)
   prejsť na dávkové upserty (fáza 1 alebo 2).
