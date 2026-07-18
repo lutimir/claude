@@ -14,9 +14,11 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "fast-xml-parser": "^5.2.0"
+    "fast-xml-parser": "^5.2.0",
+    "nodemailer": "^7.0.0"
   },
   "devDependencies": {
+    "@types/nodemailer": "^7.0.0",
     "typescript": "^5.8.0",
     "vitest": "^3.2.0"
   }

@@ -5,3 +5,7 @@ export * from "./feeds/preview";
 export * from "./matching/ean";
 export * from "./text/normalize";
 export * from "./compliance/userAgent";
+export * from "./mail/types";
+export * from "./mail/providers";
+export * from "./mail/factory";
+export * from "./mail/templates";
