@@ -3,11 +3,26 @@ import { Cron } from "croner";
 import { createDb } from "@app0/db";
 import { checkAlerts } from "./jobs/checkAlerts";
 import { importAllFeeds } from "./jobs/importFeeds";
+import { processImportJobs } from "./jobs/processImportJobs";
 import { log } from "./lib/log";
 
 const db = createDb();
 
-log("Worker beží. Denný import feedov o 03:00, kontrola cenových alarmov o 03:30.");
+log(
+  "Worker beží. Denný import feedov o 03:00, kontrola alarmov o 03:30, " +
+    "fronta manuálnych importov každých 30 s.",
+);
+
+let processingJobs = false;
+new Cron("*/30 * * * * *", () => {
+  if (processingJobs) return; // neprekrývaj dlhé importy
+  processingJobs = true;
+  processImportJobs(db)
+    .catch((err) => log(`Spracovanie import jobov zlyhalo: ${err}`))
+    .finally(() => {
+      processingJobs = false;
+    });
+});
 
 new Cron("0 3 * * *", { timezone: "Europe/Bratislava" }, () => {
   importAllFeeds(db).catch((err) => log(`Import feedov zlyhal: ${err}`));

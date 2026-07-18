@@ -1,7 +1,6 @@
-import { normalizeEan, parseHeurekaFeed, slugify, type FeedItem } from "@app0/core";
+import { fetchFeedXml, normalizeEan, parseHeurekaFeed, slugify, type FeedItem } from "@app0/core";
 import { schema, type Db } from "@app0/db";
 import { and, eq, lt } from "drizzle-orm";
-import { fetchFeedXml } from "../lib/http";
 import { log } from "../lib/log";
 
 type Feed = typeof schema.feeds.$inferSelect;
@@ -37,6 +36,25 @@ export async function importAllFeeds(db: Db): Promise<void> {
   }
 }
 
+/**
+ * Import jedného feedu podľa ID (manuálne spustenie z adminu). Consent je
+ * povinný vždy; `enabled` sa pri manuálnom spustení ignoruje, aby sa dal
+ * feed otestovať ešte pred zapnutím automatických importov.
+ */
+export async function importFeedById(db: Db, feedId: number): Promise<void> {
+  const [row] = await db
+    .select({ feed: schema.feeds, shop: schema.shops })
+    .from(schema.feeds)
+    .innerJoin(schema.shops, eq(schema.feeds.shopId, schema.shops.id))
+    .where(eq(schema.feeds.id, feedId));
+
+  if (!row) throw new Error(`Feed #${feedId} neexistuje`);
+  if (!row.feed.consentConfirmedAt) {
+    throw new Error(`Feed #${feedId} nemá potvrdený súhlas obchodu — import je zablokovaný`);
+  }
+  await importFeed(db, row.feed, row.shop);
+}
+
 export async function importFeed(db: Db, feed: Feed, shop: Shop): Promise<void> {
   log(`Import feedu #${feed.id} — ${shop.name} (${feed.url})`);
   const startedAt = new Date();
@@ -48,7 +66,7 @@ export async function importFeed(db: Db, feed: Feed, shop: Shop): Promise<void> 
   const counters: ImportCounters = { total: 0, created: 0, updated: 0, unmatched: 0 };
 
   try {
-    const xml = await fetchFeedXml(feed.url);
+    const xml = await fetchFeedXml(feed.url, { contact: process.env.FEED_FETCH_CONTACT });
     const { items, warnings } = parseHeurekaFeed(xml);
     counters.total = items.length;
     for (const warning of warnings) log(`  varovanie: ${warning}`);
