@@ -86,9 +86,17 @@ async function main() {
         legalBasis: "feed_consent" as const,
         contactEmail: "feeds@elektrodom.demo",
       },
+      {
+        name: "TechArena.cz (demo)",
+        slug: "techarena-cz-demo",
+        websiteUrl: "https://demo.app0.local/techarena",
+        country: "cz" as const,
+        legalBasis: "feed_consent" as const,
+        contactEmail: "feedy@techarena.demo",
+      },
     ])
     .returning();
-  const [techMarket, elektroDom] = insertedShops;
+  const [techMarket, elektroDom, techArena] = insertedShops;
 
   const insertedFeeds = await db
     .insert(schema.feeds)
@@ -107,9 +115,16 @@ async function main() {
         consentConfirmedAt: new Date(),
         consentNote: "Demo dáta — fiktívny obchod na vývoj. Reálne feedy pripája fáza 1.",
       },
+      {
+        shopId: techArena!.id,
+        url: "https://demo.app0.local/feeds/techarena.xml",
+        enabled: false,
+        consentConfirmedAt: new Date(),
+        consentNote: "Demo dáta — fiktívny český obchod (CZK).",
+      },
     ])
     .returning();
-  const [techMarketFeed, elektroDomFeed] = insertedFeeds;
+  const [techMarketFeed, elektroDomFeed, techArenaFeed] = insertedFeeds;
 
   console.log("Vkladám produkty…");
   interface DemoProduct {
@@ -257,13 +272,17 @@ async function main() {
     const product = insertedProducts[i]!;
 
     const shopsForProduct = [
-      { shop: techMarket!, feed: techMarketFeed!, prefix: "TM", factor: 1.0 },
+      { shop: techMarket!, feed: techMarketFeed!, prefix: "TM", factor: 1.0, currency: "EUR" as const },
       ...(demo.inSecondShop
-        ? [{ shop: elektroDom!, feed: elektroDomFeed!, prefix: "ED", factor: 0.96 + ((i * 7) % 9) / 100 }]
+        ? [{ shop: elektroDom!, feed: elektroDomFeed!, prefix: "ED", factor: 0.96 + ((i * 7) % 9) / 100, currency: "EUR" as const }]
+        : []),
+      // český obchod: cena v CZK (kurz ~25,2), mierne odlišný faktor
+      ...(i % 3 !== 2
+        ? [{ shop: techArena!, feed: techArenaFeed!, prefix: "TA", factor: (0.97 + ((i * 5) % 7) / 100) * 25.2, currency: "CZK" as const }]
         : []),
     ];
 
-    for (const { shop, feed, prefix, factor } of shopsForProduct) {
+    for (const { shop, feed, prefix, factor, currency } of shopsForProduct) {
       const currentPrice = Math.round(demo.price * factor * 100) / 100;
       const [offer] = await db
         .insert(schema.offers)
@@ -275,7 +294,7 @@ async function main() {
           title: demo.name,
           url: `${shop.websiteUrl}/produkt/${product.slug}`,
           price: currentPrice.toFixed(2),
-          currency: "EUR",
+          currency,
           availability: "0",
           eanRaw: product.ean,
           matchStatus: "matched_ean",
@@ -305,7 +324,7 @@ async function main() {
         historyRows.push({
           offerId: offer!.id,
           price: price.toFixed(2),
-          currency: "EUR" as const,
+          currency,
           recordedAt: new Date(Date.now() - day * DAY_MS),
         });
       }
