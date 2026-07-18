@@ -3,6 +3,7 @@ import {
   type AnyPgColumn,
   bigserial,
   boolean,
+  date,
   index,
   integer,
   jsonb,
@@ -220,6 +221,30 @@ export const priceHistory = pgTable(
   (t) => [index("price_history_offer_idx").on(t.offerId, t.recordedAt)],
 );
 
+/**
+ * Denné agregácie cien na produkt a menu — zdroj pre grafy a výpočet
+ * "bežnej ceny" (detekcia falošných zliav). Píše ich worker: snapshot
+ * z aktívnych ponúk po importe + backfill z price_history.
+ */
+export const productPriceDaily = pgTable(
+  "product_price_daily",
+  {
+    id: bigserial("id", { mode: "number" }).primaryKey(),
+    productId: integer("product_id")
+      .notNull()
+      .references(() => products.id, { onDelete: "cascade" }),
+    day: date("day").notNull(),
+    currency: currencyEnum("currency").notNull().default("EUR"),
+    minPrice: numeric("min_price", { precision: 12, scale: 2 }).notNull(),
+    avgPrice: numeric("avg_price", { precision: 12, scale: 2 }).notNull(),
+    offerCount: integer("offer_count").notNull().default(0),
+  },
+  (t) => [
+    uniqueIndex("product_price_daily_unique").on(t.productId, t.day, t.currency),
+    index("product_price_daily_day_idx").on(t.day),
+  ],
+);
+
 // ---------------------------------------------------------------------------
 // Cenové alarmy a recenzie (UI prichádza vo fázach 3 a 6)
 // ---------------------------------------------------------------------------
@@ -303,6 +328,14 @@ export const productsRelations = relations(products, ({ one, many }) => ({
   category: one(categories, { fields: [products.categoryId], references: [categories.id] }),
   offers: many(offers),
   alerts: many(priceAlerts),
+  dailyPrices: many(productPriceDaily),
+}));
+
+export const productPriceDailyRelations = relations(productPriceDaily, ({ one }) => ({
+  product: one(products, {
+    fields: [productPriceDaily.productId],
+    references: [products.id],
+  }),
 }));
 
 export const offersRelations = relations(offers, ({ one, many }) => ({

@@ -3,6 +3,7 @@ import postgres from "postgres";
 import * as schema from "./schema";
 
 export * as schema from "./schema";
+export * from "./aggregations";
 
 export type Db = ReturnType<typeof createDb>;
 

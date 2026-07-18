@@ -9,7 +9,7 @@ import { existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { eanCheckDigit, slugify } from "@app0/core";
 import { sql } from "drizzle-orm";
-import { createDb, schema } from "./index";
+import { backfillAggregatesFromHistory, createDb, schema, snapshotTodayAggregates } from "./index";
 
 const envPath = fileURLToPath(new URL("../../../.env", import.meta.url));
 if (existsSync(envPath)) process.loadEnvFile(envPath);
@@ -27,8 +27,8 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 async function main() {
   console.log("Mažem existujúce dáta…");
   await db.execute(sql`
-    TRUNCATE shop_reviews, price_alerts, price_history, offers, import_jobs,
-      feed_runs, products, categories, brands, feeds, shops
+    TRUNCATE shop_reviews, price_alerts, product_price_daily, price_history,
+      offers, import_jobs, feed_runs, products, categories, brands, feeds, shops
     RESTART IDENTITY CASCADE
   `);
 
@@ -282,12 +282,25 @@ async function main() {
         .returning();
       offerCount++;
 
-      // 30 dní histórie: mierne klesajúci trend s deterministickým "šumom"
+      // 30 dní histórie s deterministickým "šumom"; každý 4. produkt má
+      // výraznú čerstvú zľavu (pred 5 dňami zlacnel o ~18 %) — dáta pre
+      // sekciu "najväčšie poklesy cien" a detekciu falošných zliav
+      const bigDrop = i % 4 === 0;
       const historyRows = [];
       for (let day = 30; day >= 0; day--) {
         const noise = (((i * 31 + day * 17) % 11) - 5) / 200; // ±2,5 %
-        const trend = 1 + (day / 30) * 0.06; // pred 30 dňami ~6 % drahšie
-        const price = day === 0 ? currentPrice : Math.round(currentPrice * (trend + noise) * 100) / 100;
+        let price: number;
+        if (day === 0) {
+          price = currentPrice;
+        } else if (bigDrop) {
+          price =
+            day > 4
+              ? Math.round(currentPrice * (1.18 + noise) * 100) / 100
+              : currentPrice;
+        } else {
+          const trend = 1 + (day / 30) * 0.06; // pred 30 dňami ~6 % drahšie
+          price = Math.round(currentPrice * (trend + noise) * 100) / 100;
+        }
         historyRows.push({
           offerId: offer!.id,
           price: price.toFixed(2),
@@ -299,6 +312,10 @@ async function main() {
       historyCount += historyRows.length;
     }
   }
+
+  console.log("Počítam denné agregácie cien…");
+  await backfillAggregatesFromHistory(db);
+  await snapshotTodayAggregates(db);
 
   console.log(
     `Hotovo: ${insertedProducts.length} produktov, ${offerCount} ponúk, ` +
