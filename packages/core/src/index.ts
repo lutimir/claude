@@ -3,6 +3,7 @@ export * from "./feeds/heureka";
 export * from "./feeds/fetch";
 export * from "./feeds/preview";
 export * from "./matching/ean";
+export * from "./comparison/params";
 export * from "./text/normalize";
 export * from "./compliance/userAgent";
 export * from "./mail/types";
