@@ -8,13 +8,17 @@ interface InteractivePriceChartProps {
   emptyLabel: string;
   minLabel: string;
   avgLabel: string;
+  currency?: "EUR" | "CZK";
 }
 
 const WIDTH = 640;
 const HEIGHT = 200;
 const PAD = 12;
 
-const priceFormat = new Intl.NumberFormat("sk-SK", { style: "currency", currency: "EUR" });
+const priceFormats = {
+  EUR: new Intl.NumberFormat("sk-SK", { style: "currency", currency: "EUR" }),
+  CZK: new Intl.NumberFormat("cs-CZ", { style: "currency", currency: "CZK" }),
+};
 const dayFormat = new Intl.DateTimeFormat("sk-SK", { day: "numeric", month: "short" });
 
 /** Interaktívny graf vývoja cien — čistý SVG bez knižníc, tooltip na pointer. */
@@ -23,8 +27,10 @@ export function InteractivePriceChart({
   emptyLabel,
   minLabel,
   avgLabel,
+  currency = "EUR",
 }: InteractivePriceChartProps) {
   const [hoverIndex, setHoverIndex] = useState<number | null>(null);
+  const priceFormat = priceFormats[currency];
 
   if (points.length < 2) {
     return <p className="text-sm text-neutral-500">{emptyLabel}</p>;

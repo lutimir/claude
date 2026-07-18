@@ -1,6 +1,8 @@
-import Link from "next/link";
+import { Suspense } from "react";
+import { Link } from "@/i18n/navigation";
 import { getTranslations } from "next-intl/server";
 import { appName } from "@/lib/config";
+import { LocaleSwitcher } from "./LocaleSwitcher";
 import { SearchBox } from "./SearchBox";
 
 export async function Header() {
@@ -14,6 +16,9 @@ export async function Header() {
         <div className="min-w-56 flex-1">
           <SearchBox placeholder={t("searchPlaceholder")} buttonLabel={t("search")} />
         </div>
+        <Suspense fallback={null}>
+          <LocaleSwitcher />
+        </Suspense>
       </div>
     </header>
   );

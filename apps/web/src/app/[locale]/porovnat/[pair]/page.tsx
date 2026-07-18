@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import { mergeComparisonParams } from "@app0/core";
 import { ComparisonTable } from "@/components/ComparisonTable";
+import { currencyForLocale } from "@/lib/currency";
 import { getDb } from "@/lib/db";
 import { formatPrice } from "@/lib/format";
 import { getParamAliasMap, getProductSlugs, getProductsForComparison } from "@/lib/queries";
@@ -23,7 +24,7 @@ async function resolvePair(pair: string) {
   if (found.length !== 2) return null;
 
   const ids = slugs.map((slug) => found.find((product) => product.slug === slug)!.id);
-  const products = await getProductsForComparison(db, ids);
+  const products = await getProductsForComparison(db, ids, currencyForLocale(await getLocale()));
   return products.length === 2 ? products : null;
 }
 

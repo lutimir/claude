@@ -1,12 +1,14 @@
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { Suspense } from "react";
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import { CompareToggle } from "@/components/CompareToggle";
+import { currencyForLocale } from "@/lib/currency";
 import { formatPrice } from "@/lib/format";
 import type { ProductCardData } from "@/lib/queries";
 
 export async function ProductCard({ product }: { product: ProductCardData }) {
   const t = await getTranslations("common");
+  const currency = currencyForLocale(await getLocale());
   return (
     <Link
       href={`/produkt/${product.slug}`}
@@ -45,7 +47,7 @@ export async function ProductCard({ product }: { product: ProductCardData }) {
       </div>
       <div className="flex items-baseline justify-between gap-2">
         <p className="font-semibold text-emerald-700 dark:text-emerald-400">
-          {product.minPrice ? t("fromPrice", { price: formatPrice(product.minPrice) }) : t("noOffers")}
+          {product.minPrice ? t("fromPrice", { price: formatPrice(product.minPrice, currency) }) : t("noOffers")}
         </p>
         <p className="text-xs text-neutral-500">{t("offersCount", { count: product.offerCount })}</p>
       </div>

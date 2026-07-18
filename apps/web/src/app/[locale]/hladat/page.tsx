@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import { Pagination } from "@/components/Pagination";
 import { ProductGrid } from "@/components/ProductGrid";
 import { getDb } from "@/lib/db";
+import { currencyForLocale } from "@/lib/currency";
 import { searchProducts } from "@/lib/queries";
 
 export const dynamic = "force-dynamic";
@@ -34,6 +35,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
     query,
     PAGE_SIZE + 1,
     (page - 1) * PAGE_SIZE,
+    currencyForLocale(await getLocale()),
   );
   const hasNext = resultsPlusOne.length > PAGE_SIZE;
   const results = resultsPlusOne.slice(0, PAGE_SIZE);

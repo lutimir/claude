@@ -1,7 +1,8 @@
-import Link from "next/link";
-import { getTranslations } from "next-intl/server";
+import { Link } from "@/i18n/navigation";
+import { getLocale, getTranslations } from "next-intl/server";
 import { PriceDropCard } from "@/components/PriceDropCard";
 import { ProductGrid } from "@/components/ProductGrid";
+import { currencyForLocale } from "@/lib/currency";
 import {
   getCategoriesWithCountsCached,
   getLatestProductsCached,
@@ -13,11 +14,12 @@ export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
   const t = await getTranslations("home");
+  const currency = currencyForLocale(await getLocale());
   const [stats, categories, latestProducts, priceDrops] = await Promise.all([
     getStatsCached(),
     getCategoriesWithCountsCached(),
-    getLatestProductsCached(8),
-    getTopPriceDropsCached(4),
+    getLatestProductsCached(8, currency),
+    getTopPriceDropsCached(4, currency),
   ]);
 
   const statItems = [

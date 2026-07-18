@@ -1,6 +1,7 @@
-import Link from "next/link";
-import { getTranslations } from "next-intl/server";
+import { Link } from "@/i18n/navigation";
+import { getLocale, getTranslations } from "next-intl/server";
 import type { ComparisonRow } from "@app0/core";
+import { currencyForLocale } from "@/lib/currency";
 import { formatPrice } from "@/lib/format";
 import type { ComparisonProduct } from "@/lib/queries";
 
@@ -14,6 +15,7 @@ interface ComparisonTableProps {
 export async function ComparisonTable({ products, rows, removeLinks }: ComparisonTableProps) {
   const t = await getTranslations("compare");
   const tCommon = await getTranslations("common");
+  const currency = currencyForLocale(await getLocale());
 
   return (
     <div className="overflow-x-auto rounded-xl border border-neutral-200 dark:border-neutral-800">
@@ -68,7 +70,7 @@ export async function ComparisonTable({ products, rows, removeLinks }: Compariso
               <td key={product.id} className="px-4 py-3">
                 <p className="font-semibold text-emerald-700 dark:text-emerald-400">
                   {product.minPrice
-                    ? tCommon("fromPrice", { price: formatPrice(product.minPrice) })
+                    ? tCommon("fromPrice", { price: formatPrice(product.minPrice, currency) })
                     : tCommon("noOffers")}
                 </p>
                 <p className="text-xs text-neutral-500">

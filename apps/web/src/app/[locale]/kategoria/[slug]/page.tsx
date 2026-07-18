@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import { Pagination } from "@/components/Pagination";
 import { ProductGrid } from "@/components/ProductGrid";
 import { getProductsInCategoryCached } from "@/lib/cachedQueries";
+import { currencyForLocale } from "@/lib/currency";
 import { getDb } from "@/lib/db";
 import { getCategoryBySlug } from "@/lib/queries";
 
@@ -35,10 +36,12 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
   if (!category) notFound();
 
   // limit+1: posledný záznam len signalizuje existenciu ďalšej strany
+  const currency = currencyForLocale(await getLocale());
   const productsPlusOne = await getProductsInCategoryCached(
     category.id,
     PAGE_SIZE + 1,
     (page - 1) * PAGE_SIZE,
+    currency,
   );
   const hasNext = productsPlusOne.length > PAGE_SIZE;
   const products = productsPlusOne.slice(0, PAGE_SIZE);

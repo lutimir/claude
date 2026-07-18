@@ -2,7 +2,8 @@ type Currency = "EUR" | "CZK";
 
 const priceFormats: Record<Currency, Intl.NumberFormat> = {
   EUR: new Intl.NumberFormat("sk-SK", { style: "currency", currency: "EUR" }),
-  CZK: new Intl.NumberFormat("sk-SK", { style: "currency", currency: "CZK" }),
+  // cs-CZ kvôli symbolu "Kč" (sk-SK renderuje CZK ako kód meny)
+  CZK: new Intl.NumberFormat("cs-CZ", { style: "currency", currency: "CZK" }),
 };
 
 export function formatPrice(value: string | number, currency: Currency = "EUR"): string {

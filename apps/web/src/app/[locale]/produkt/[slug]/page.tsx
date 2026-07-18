@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { notFound } from "next/navigation";
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import { AlertForm } from "@/components/AlertForm";
 import { InteractivePriceChart } from "@/components/InteractivePriceChart";
 import { OffersTable } from "@/components/OffersTable";
@@ -13,6 +13,7 @@ import {
   getFairPriceInfoCached,
   getShopRatingsCached,
 } from "@/lib/cachedQueries";
+import { currencyForLocale } from "@/lib/currency";
 import { getProductBySlug } from "@/lib/queries";
 
 export const dynamic = "force-dynamic";
@@ -32,7 +33,10 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
   return {
     title: product.name,
     description,
-    alternates: { canonical: `/produkt/${product.slug}` },
+    alternates: {
+      canonical: `/produkt/${product.slug}`,
+      languages: { sk: `/produkt/${product.slug}`, cs: `/cs/produkt/${product.slug}` },
+    },
     openGraph: {
       title: product.name,
       description,
@@ -54,16 +58,17 @@ export default async function ProductPage({ params, searchParams }: ProductPageP
   const range = (CHART_RANGES as readonly number[]).includes(Number(obdobie))
     ? Number(obdobie)
     : 90;
+  const currency = currencyForLocale(await getLocale());
   const [history, fairPrice, compareSuggestions, shopRatings] = await Promise.all([
-    getDailyPricesCached(product.id, range),
-    getFairPriceInfoCached(product.id),
+    getDailyPricesCached(product.id, range, currency),
+    getFairPriceInfoCached(product.id, currency),
     getCompareSuggestionsCached(product.id, product.categoryId),
     getShopRatingsCached([...new Set(product.offers.map((offer) => offer.shopId))].sort()),
   ]);
-  const eurPrices = product.offers
-    .filter((offer) => offer.currency === "EUR")
+  const primaryPrices = product.offers
+    .filter((offer) => offer.currency === currency)
     .map((offer) => Number(offer.price));
-  const currentMin = eurPrices.length > 0 ? Math.min(...eurPrices) : null;
+  const currentMin = primaryPrices.length > 0 ? Math.min(...primaryPrices) : null;
   const fairDiffPct =
     fairPrice && currentMin !== null
       ? Math.round((1 - currentMin / fairPrice.fairPrice) * 1000) / 10
@@ -80,14 +85,14 @@ export default async function ProductPage({ params, searchParams }: ProductPageP
       ...(product.imageUrl ? { image: product.imageUrl } : {}),
       ...(product.brand ? { brand: { "@type": "Brand", name: product.brand.name } } : {}),
       ...(product.ean ? { gtin13: product.ean } : {}),
-      ...(eurPrices.length > 0
+      ...(primaryPrices.length > 0
         ? {
             offers: {
               "@type": "AggregateOffer",
-              priceCurrency: "EUR",
-              lowPrice: Math.min(...eurPrices).toFixed(2),
-              highPrice: Math.max(...eurPrices).toFixed(2),
-              offerCount: eurPrices.length,
+              priceCurrency: currency,
+              lowPrice: Math.min(...primaryPrices).toFixed(2),
+              highPrice: Math.max(...primaryPrices).toFixed(2),
+              offerCount: primaryPrices.length,
               availability: "https://schema.org/InStock",
             },
           }
@@ -204,7 +209,7 @@ export default async function ProductPage({ params, searchParams }: ProductPageP
           </div>
           {fairPrice && currentMin !== null && fairDiffPct !== null ? (
             <p className="mb-3 rounded-lg bg-neutral-50 px-3 py-2 text-sm dark:bg-neutral-800/60">
-              {t("fairPrice")}: <span className="font-semibold">{formatPrice(fairPrice.fairPrice)}</span>
+              {t("fairPrice")}: <span className="font-semibold">{formatPrice(fairPrice.fairPrice, currency)}</span>
               {" · "}
               {fairDiffPct > 1 ? (
                 <span className="font-medium text-emerald-700 dark:text-emerald-400">
@@ -224,9 +229,10 @@ export default async function ProductPage({ params, searchParams }: ProductPageP
             emptyLabel={t("historyEmpty")}
             minLabel={t("chartMin")}
             avgLabel={t("chartAvg")}
+            currency={currency}
           />
         </div>
-        <AlertForm productId={product.id} slug={product.slug} status={alarm} />
+        <AlertForm productId={product.id} slug={product.slug} status={alarm} currency={currency} />
       </section>
 
       {compareSuggestions.length > 0 ? (

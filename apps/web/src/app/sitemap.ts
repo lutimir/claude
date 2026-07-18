@@ -20,25 +20,27 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     db.select({ slug: schema.shops.slug }).from(schema.shops),
   ]);
 
-  return [
-    { url: base, changeFrequency: "daily", priority: 1 },
-    { url: `${base}/podmienky`, changeFrequency: "yearly", priority: 0.2 },
-    { url: `${base}/sukromie`, changeFrequency: "yearly", priority: 0.2 },
+  // sk beží bez prefixu, čeština na /cs — obe verzie patria do sitemap
+  const prefixes = ["", "/cs"];
+  return prefixes.flatMap((prefix) => [
+    { url: `${base}${prefix}` || base, changeFrequency: "daily" as const, priority: 1 },
+    { url: `${base}${prefix}/podmienky`, changeFrequency: "yearly" as const, priority: 0.2 },
+    { url: `${base}${prefix}/sukromie`, changeFrequency: "yearly" as const, priority: 0.2 },
     ...categories.map((category) => ({
-      url: `${base}/kategoria/${category.slug}`,
+      url: `${base}${prefix}/kategoria/${category.slug}`,
       changeFrequency: "daily" as const,
       priority: 0.8,
     })),
     ...products.map((product) => ({
-      url: `${base}/produkt/${product.slug}`,
+      url: `${base}${prefix}/produkt/${product.slug}`,
       lastModified: product.updatedAt,
       changeFrequency: "daily" as const,
       priority: 0.7,
     })),
     ...shops.map((shop) => ({
-      url: `${base}/obchod/${shop.slug}`,
+      url: `${base}${prefix}/obchod/${shop.slug}`,
       changeFrequency: "weekly" as const,
       priority: 0.4,
     })),
-  ];
+  ]);
 }

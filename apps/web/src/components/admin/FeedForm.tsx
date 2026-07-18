@@ -3,7 +3,7 @@
 import { startTransition, useActionState, useState } from "react";
 import { useTranslations } from "next-intl";
 import type { FeedPreview } from "@app0/core";
-import { feedFormAction, type FeedFormState } from "@/app/admin/obchody/actions";
+import { feedFormAction, type FeedFormState } from "@/app/[locale]/admin/obchody/actions";
 
 interface FeedFormProps {
   shopId: number;

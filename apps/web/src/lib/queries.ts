@@ -12,19 +12,23 @@ export interface ProductCardData {
   offerCount: number;
 }
 
-const productCardSelect = {
-  id: schema.products.id,
-  name: schema.products.name,
-  slug: schema.products.slug,
-  imageUrl: schema.products.imageUrl,
-  brandName: schema.brands.name,
-  minPrice: sql<
-    string | null
-  >`min(${schema.offers.price}) filter (where ${schema.offers.active} and ${schema.offers.currency} = 'EUR')`,
-  offerCount: sql<number>`count(${schema.offers.id}) filter (where ${schema.offers.active})`.mapWith(
-    Number,
-  ),
-};
+export type Currency = "EUR" | "CZK";
+
+function productCardSelect(currency: Currency) {
+  return {
+    id: schema.products.id,
+    name: schema.products.name,
+    slug: schema.products.slug,
+    imageUrl: schema.products.imageUrl,
+    brandName: schema.brands.name,
+    minPrice: sql<
+      string | null
+    >`min(${schema.offers.price}) filter (where ${schema.offers.active} and ${schema.offers.currency} = ${currency})`,
+    offerCount: sql<number>`count(${schema.offers.id}) filter (where ${schema.offers.active})`.mapWith(
+      Number,
+    ),
+  };
+}
 
 export async function getStats(db: Db) {
   const [products] = await db.select({ value: count() }).from(schema.products);
@@ -39,9 +43,13 @@ export async function getStats(db: Db) {
   return { products: products!.value, offers: offers!.value, shops: shops!.value };
 }
 
-export async function getLatestProducts(db: Db, limit = 8): Promise<ProductCardData[]> {
+export async function getLatestProducts(
+  db: Db,
+  limit = 8,
+  currency: Currency = "EUR",
+): Promise<ProductCardData[]> {
   return db
-    .select(productCardSelect)
+    .select(productCardSelect(currency))
     .from(schema.products)
     .leftJoin(schema.brands, eq(schema.products.brandId, schema.brands.id))
     .leftJoin(schema.offers, eq(schema.offers.productId, schema.products.id))
@@ -59,10 +67,11 @@ export async function searchProducts(
   query: string,
   limit = 24,
   offset = 0,
+  currency: Currency = "EUR",
 ): Promise<ProductCardData[]> {
   const pattern = `%${query}%`;
   return db
-    .select(productCardSelect)
+    .select(productCardSelect(currency))
     .from(schema.products)
     .leftJoin(schema.brands, eq(schema.products.brandId, schema.brands.id))
     .leftJoin(schema.offers, eq(schema.offers.productId, schema.products.id))
@@ -111,9 +120,10 @@ export async function getProductsInCategory(
   categoryId: number,
   limit = 24,
   offset = 0,
+  currency: Currency = "EUR",
 ): Promise<ProductCardData[]> {
   return db
-    .select(productCardSelect)
+    .select(productCardSelect(currency))
     .from(schema.products)
     .leftJoin(schema.brands, eq(schema.products.brandId, schema.brands.id))
     .leftJoin(schema.offers, eq(schema.offers.productId, schema.products.id))
@@ -146,7 +156,12 @@ export interface PricePoint {
 }
 
 /** Denné agregáty cien produktu (EUR) za zvolené obdobie. */
-export async function getDailyPrices(db: Db, productId: number, days: number): Promise<PricePoint[]> {
+export async function getDailyPrices(
+  db: Db,
+  productId: number,
+  days: number,
+  currency: Currency = "EUR",
+): Promise<PricePoint[]> {
   const rows = await db
     .select({
       day: sql<string>`to_char(${schema.productPriceDaily.day}, 'YYYY-MM-DD')`,
@@ -157,7 +172,7 @@ export async function getDailyPrices(db: Db, productId: number, days: number): P
     .where(
       and(
         eq(schema.productPriceDaily.productId, productId),
-        eq(schema.productPriceDaily.currency, "EUR"),
+        eq(schema.productPriceDaily.currency, currency),
         sql`${schema.productPriceDaily.day} > current_date - ${days}::int`,
       ),
     )
@@ -172,7 +187,11 @@ export interface FairPriceInfo {
   days: number;
 }
 
-export async function getFairPriceInfo(db: Db, productId: number): Promise<FairPriceInfo | null> {
+export async function getFairPriceInfo(
+  db: Db,
+  productId: number,
+  currency: Currency = "EUR",
+): Promise<FairPriceInfo | null> {
   const [row] = await db
     .select({
       fairPrice: sql<string | null>`round(avg(${schema.productPriceDaily.minPrice}), 2)`,
@@ -182,7 +201,7 @@ export async function getFairPriceInfo(db: Db, productId: number): Promise<FairP
     .where(
       and(
         eq(schema.productPriceDaily.productId, productId),
-        eq(schema.productPriceDaily.currency, "EUR"),
+        eq(schema.productPriceDaily.currency, currency),
         sql`${schema.productPriceDaily.day} > current_date - 30`,
       ),
     );
@@ -206,7 +225,11 @@ export interface PriceDrop {
  * Produkty s aktuálnou najnižšou cenou výrazne pod 30-dňovým priemerom.
  * Vyžaduje aspoň 5 dní dát — chráni pred "zľavami" z jednodňovej histórie.
  */
-export async function getTopPriceDrops(db: Db, limit = 4): Promise<PriceDrop[]> {
+export async function getTopPriceDrops(
+  db: Db,
+  limit = 4,
+  currency: Currency = "EUR",
+): Promise<PriceDrop[]> {
   const rows = await db.execute(sql`
     select p.id, p.name, p.slug, p.image_url, b.name as brand_name,
            cur.min_price as current_price, cur.offer_count,
@@ -217,12 +240,12 @@ export async function getTopPriceDrops(db: Db, limit = 4): Promise<PriceDrop[]> 
     join lateral (
       select min(o.price) as min_price, count(*) as offer_count
       from offers o
-      where o.product_id = p.id and o.active and o.currency = 'EUR'
+      where o.product_id = p.id and o.active and o.currency = ${currency}
     ) cur on cur.min_price is not null
     join lateral (
       select round(avg(d.min_price), 2) as avg30, count(*) as days
       from product_price_daily d
-      where d.product_id = p.id and d.currency = 'EUR' and d.day > current_date - 30
+      where d.product_id = p.id and d.currency = ${currency} and d.day > current_date - 30
     ) agg on agg.days >= 5 and agg.avg30 > 0
     where cur.min_price < agg.avg30 * 0.98
     order by drop_pct desc
@@ -367,10 +390,14 @@ export interface ComparisonProduct {
   offerCount: number;
 }
 
-export async function getProductsForComparison(db: Db, ids: number[]): Promise<ComparisonProduct[]> {
+export async function getProductsForComparison(
+  db: Db,
+  ids: number[],
+  currency: Currency = "EUR",
+): Promise<ComparisonProduct[]> {
   if (ids.length === 0) return [];
   const rows = await db
-    .select({ ...productCardSelect, params: schema.products.params })
+    .select({ ...productCardSelect(currency), params: schema.products.params })
     .from(schema.products)
     .leftJoin(schema.brands, eq(schema.products.brandId, schema.brands.id))
     .leftJoin(schema.offers, eq(schema.offers.productId, schema.products.id))

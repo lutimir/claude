@@ -1,14 +1,16 @@
-import { getTranslations } from "next-intl/server";
-import { createPriceAlert } from "@/app/produkt/[slug]/actions";
+import { getLocale, getTranslations } from "next-intl/server";
+import { createPriceAlert } from "@/app/[locale]/produkt/[slug]/actions";
 
 interface AlertFormProps {
   productId: number;
   slug: string;
   status?: string;
+  currency: "EUR" | "CZK";
 }
 
-export async function AlertForm({ productId, slug, status }: AlertFormProps) {
+export async function AlertForm({ productId, slug, status, currency }: AlertFormProps) {
   const t = await getTranslations("product");
+  const locale = await getLocale();
   const inputClass =
     "rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm outline-none transition focus:border-emerald-500 dark:border-neutral-700 dark:bg-neutral-900";
 
@@ -37,6 +39,8 @@ export async function AlertForm({ productId, slug, status }: AlertFormProps) {
       <form action={createPriceAlert} className="mt-3 flex flex-wrap gap-2">
         <input type="hidden" name="productId" value={productId} />
         <input type="hidden" name="slug" value={slug} />
+        <input type="hidden" name="currency" value={currency} />
+        <input type="hidden" name="locale" value={locale} />
         <input
           type="email"
           name="email"
@@ -49,7 +53,7 @@ export async function AlertForm({ productId, slug, status }: AlertFormProps) {
           inputMode="decimal"
           name="targetPrice"
           required
-          placeholder={t("alertTargetPrice")}
+          placeholder={t("alertTargetPrice", { currency: currency === "EUR" ? "€" : "Kč" })}
           className={`${inputClass} w-36`}
         />
         <button

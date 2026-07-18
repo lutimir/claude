@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
-import Link from "next/link";
-import { getTranslations } from "next-intl/server";
+import { Link } from "@/i18n/navigation";
+import { getLocale, getTranslations } from "next-intl/server";
 import { mergeComparisonParams } from "@app0/core";
 import { ComparisonTable } from "@/components/ComparisonTable";
+import { currencyForLocale } from "@/lib/currency";
 import { getDb } from "@/lib/db";
 import { getParamAliasMap, getProductsForComparison } from "@/lib/queries";
 
@@ -33,7 +34,7 @@ export default async function ComparePage({ searchParams }: ComparePageProps) {
   ].slice(0, MAX_COMPARE);
 
   const db = getDb();
-  const products = await getProductsForComparison(db, ids);
+  const products = await getProductsForComparison(db, ids, currencyForLocale(await getLocale()));
 
   if (products.length < 2) {
     return (

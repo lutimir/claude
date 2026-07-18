@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { getTranslations } from "next-intl/server";
 import { Stars } from "@/components/Stars";
 import { formatPrice } from "@/lib/format";

@@ -1,3 +1,4 @@
+import type { Currency } from "./queries";
 import { unstable_cache } from "next/cache";
 import { getDb } from "./db";
 import {
@@ -37,26 +38,30 @@ export const getCategoriesWithCountsCached = cached("categories", async () =>
   getCategoriesWithCounts(getDb()),
 );
 
-export const getLatestProductsCached = cached("latest-products", async (limit: number) =>
-  getLatestProducts(getDb(), limit),
+export const getLatestProductsCached = cached(
+  "latest-products",
+  async (limit: number, currency: Currency) => getLatestProducts(getDb(), limit, currency),
 );
 
-export const getTopPriceDropsCached = cached("price-drops", async (limit: number) =>
-  getTopPriceDrops(getDb(), limit),
+export const getTopPriceDropsCached = cached("price-drops", async (limit: number, currency: Currency) =>
+  getTopPriceDrops(getDb(), limit, currency),
 );
 
 export const getProductsInCategoryCached = cached(
   "category-products",
-  async (categoryId: number, limit: number, offset: number) =>
-    getProductsInCategory(getDb(), categoryId, limit, offset),
+  async (categoryId: number, limit: number, offset: number, currency: Currency) =>
+    getProductsInCategory(getDb(), categoryId, limit, offset, currency),
 );
 
-export const getDailyPricesCached = cached("daily-prices", async (productId: number, days: number) =>
-  getDailyPrices(getDb(), productId, days),
+export const getDailyPricesCached = cached(
+  "daily-prices",
+  async (productId: number, days: number, currency: Currency) =>
+    getDailyPrices(getDb(), productId, days, currency),
 );
 
-export const getFairPriceInfoCached = cached("fair-price", async (productId: number) =>
-  getFairPriceInfo(getDb(), productId),
+export const getFairPriceInfoCached = cached(
+  "fair-price",
+  async (productId: number, currency: Currency) => getFairPriceInfo(getDb(), productId, currency),
 );
 
 export const getCompareSuggestionsCached = cached(

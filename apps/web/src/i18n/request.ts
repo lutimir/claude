@@ -1,8 +1,12 @@
+import { hasLocale } from "next-intl";
 import { getRequestConfig } from "next-intl/server";
+import { routing } from "./routing";
 
-// UI je zatiaľ len po slovensky; všetky texty však žijú v prekladových
-// súboroch, takže čeština (fáza 8) sa doplní bez zásahu do komponentov.
-export default getRequestConfig(async () => ({
-  locale: "sk",
-  messages: (await import("../messages/sk.json")).default,
-}));
+export default getRequestConfig(async ({ requestLocale }) => {
+  const requested = await requestLocale;
+  const locale = hasLocale(routing.locales, requested) ? requested : routing.defaultLocale;
+  return {
+    locale,
+    messages: (await import(`../messages/${locale}.json`)).default,
+  };
+});

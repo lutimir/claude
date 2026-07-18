@@ -5,13 +5,16 @@ import { buildAlertConfirmationEmail, createMailer } from "@app0/core";
 import { schema } from "@app0/db";
 import { and, eq, isNull } from "drizzle-orm";
 import { headers } from "next/headers";
-import { redirect } from "next/navigation";
+import { hasLocale } from "next-intl";
+import { redirect as i18nRedirect } from "@/i18n/navigation";
+import { routing } from "@/i18n/routing";
 import { z } from "zod";
 import { getDb } from "@/lib/db";
 import { rateLimit } from "@/lib/rateLimit";
 
 const alertSchema = z.object({
   productId: z.coerce.number().int().positive(),
+  currency: z.enum(["EUR", "CZK"]),
   slug: z
     .string()
     .min(1)
@@ -32,14 +35,21 @@ const ALERTS_PER_IP_PER_HOUR = 5;
  */
 export async function createPriceAlert(formData: FormData): Promise<void> {
   const rawSlug = encodeURIComponent(String(formData.get("slug") ?? ""));
+  const rawLocale = String(formData.get("locale") ?? "");
+  const locale = hasLocale(routing.locales, rawLocale) ? rawLocale : routing.defaultLocale;
+  const redirect = (href: string): never => i18nRedirect({ href, locale });
 
   const parsed = alertSchema.safeParse({
     productId: formData.get("productId"),
+    currency: formData.get("currency"),
     slug: formData.get("slug"),
     email: formData.get("email"),
     targetPrice: formData.get("targetPrice"),
   });
-  if (!parsed.success) redirect(`/produkt/${rawSlug}?alarm=chyba`);
+  if (!parsed.success) {
+    redirect(`/produkt/${rawSlug}?alarm=chyba`);
+    return;
+  }
 
   const requestHeaders = await headers();
   const ip = requestHeaders.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
@@ -47,10 +57,13 @@ export async function createPriceAlert(formData: FormData): Promise<void> {
     redirect(`/produkt/${rawSlug}?alarm=limit`);
   }
 
-  const { productId, slug, email, targetPrice } = parsed.data;
+  const { productId, currency, slug, email, targetPrice } = parsed.data;
   const db = getDb();
   const product = await db.query.products.findFirst({ where: eq(schema.products.id, productId) });
-  if (!product || product.slug !== slug) redirect(`/produkt/${rawSlug}?alarm=chyba`);
+  if (!product || product.slug !== slug) {
+    redirect(`/produkt/${rawSlug}?alarm=chyba`);
+    return;
+  }
 
   const baseUrl = process.env.APP_BASE_URL ?? "http://localhost:3000";
   const targetPriceStr = targetPrice.toFixed(2);
@@ -59,6 +72,7 @@ export async function createPriceAlert(formData: FormData): Promise<void> {
     where: and(
       eq(schema.priceAlerts.productId, productId),
       eq(schema.priceAlerts.email, email),
+      eq(schema.priceAlerts.currency, currency),
       isNull(schema.priceAlerts.notifiedAt),
     ),
   });
@@ -74,7 +88,7 @@ export async function createPriceAlert(formData: FormData): Promise<void> {
         redirect(`/produkt/${slug}?alarm=aktualizovane`);
       }
       // Nepotvrdený alarm: pošli potvrdenie znova s pôvodným tokenom
-      await sendConfirmation(email, product.name, targetPriceStr, existing.token, baseUrl);
+      await sendConfirmation(email, product.name, targetPriceStr, currency, existing.token, baseUrl);
       redirect(`/produkt/${slug}?alarm=skontroluj`);
     }
 
@@ -83,10 +97,11 @@ export async function createPriceAlert(formData: FormData): Promise<void> {
       productId,
       email,
       targetPrice: targetPriceStr,
+      currency,
       token,
       confirmedAt: null,
     });
-    await sendConfirmation(email, product.name, targetPriceStr, token, baseUrl);
+    await sendConfirmation(email, product.name, targetPriceStr, currency, token, baseUrl);
     redirect(`/produkt/${slug}?alarm=skontroluj`);
   } catch (err) {
     // redirect() vnútri try funguje cez výnimku — musí prejsť von
@@ -100,13 +115,14 @@ async function sendConfirmation(
   email: string,
   productName: string,
   targetPrice: string,
+  currency: "EUR" | "CZK",
   token: string,
   baseUrl: string,
 ): Promise<void> {
   const mail = buildAlertConfirmationEmail({
     productName,
     targetPrice,
-    currency: "EUR",
+    currency,
     confirmUrl: `${baseUrl}/alarm/${token}?akcia=potvrdit`,
   });
   await createMailer().send({ to: email, ...mail });

@@ -1,10 +1,12 @@
-import Link from "next/link";
-import { getTranslations } from "next-intl/server";
+import { Link } from "@/i18n/navigation";
+import { getLocale, getTranslations } from "next-intl/server";
+import { currencyForLocale } from "@/lib/currency";
 import { formatPrice } from "@/lib/format";
 import type { PriceDrop } from "@/lib/queries";
 
 export async function PriceDropCard({ drop }: { drop: PriceDrop }) {
   const t = await getTranslations("common");
+  const currency = currencyForLocale(await getLocale());
   return (
     <Link
       href={`/produkt/${drop.slug}`}
@@ -39,9 +41,9 @@ export async function PriceDropCard({ drop }: { drop: PriceDrop }) {
       </div>
       <div className="flex items-baseline gap-2">
         <p className="font-semibold text-emerald-700 dark:text-emerald-400">
-          {formatPrice(drop.currentPrice)}
+          {formatPrice(drop.currentPrice, currency)}
         </p>
-        <p className="text-sm text-neutral-400 line-through">{formatPrice(drop.fairPrice)}</p>
+        <p className="text-sm text-neutral-400 line-through">{formatPrice(drop.fairPrice, currency)}</p>
         <p className="ml-auto text-xs text-neutral-500">
           {t("offersCount", { count: drop.offerCount })}
         </p>

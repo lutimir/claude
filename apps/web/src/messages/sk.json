@@ -67,7 +67,7 @@
     "alertTitle": "Strážiť cenu",
     "alertDescription": "Pošleme ti e-mail, keď cena klesne pod tvoju hranicu.",
     "alertEmail": "Tvoj e-mail",
-    "alertTargetPrice": "Cieľová cena (€)",
+    "alertTargetPrice": "Cieľová cena ({currency})",
     "alertSubmit": "Nastaviť alarm",
     "alertCheckEmail": "Skoro hotovo — potvrď alarm kliknutím na odkaz v e-maile, ktorý sme ti poslali.",
     "alertUpdated": "Alarm aktualizovaný — nová cieľová cena je uložená.",
