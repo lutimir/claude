@@ -72,23 +72,17 @@ po opakovanom behu.
 
 ---
 
-## ⬜ Fáza 5 — Porovnanie parametrov produktov
+## ✅ Fáza 5 — Porovnanie parametrov produktov (hotová)
 
-**Cieľ:** tabuľkové porovnanie 2–4 produktov.
-**Rozsah:** normalizácia názvov parametrov (číselník + aliasy), stránka
-/porovnat?ids=..., výber produktov na porovnanie (checkbox na kartách, stav v URL),
-zvýraznenie rozdielov, SEO stránky "X vs Y".
-**Hotové keď:** dva produkty sa dajú porovnať vedľa seba so zvýraznenými rozdielmi.
-
-**Prompt:**
-```text
-Pokračuj v projekte App0 (pozri README.md a ROADMAP.md — Fáza 5). Sprav porovnanie
-produktov: normalizácia parametrov (mapovacia tabuľka aliasov názvov parametrov),
-stránka /porovnat?ids=1,2,3 s tabuľkou parametrov vedľa seba a zvýraznením
-rozdielov, pridávanie do porovnania z kariet produktov (bez účtu, stav v URL),
-a SEO friendly stránky /porovnat/slug-a-vs-slug-b. Po dokončení aktualizuj
-ROADMAP.md a commitni.
-```
+Číselník aliasov (`param_aliases`, alias normalizovaný lower+bez diakritiky →
+kanonický názov) a `mergeComparisonParams` v core: kľúče parametrov sa
+normalizujú a zlučujú ("Úložisko" a "Pamäť" = jeden riadok), riadky sa radia
+podľa vyplnenosti, zhodné sú tlmené a rozdielové zvýraznené. Výber cez ⇄
+prepínač na kartách produktov — stav žije v URL (?porovnat=1,2, max 4),
+plávajúca lišta s CTA. Stránka /porovnat?ids=… s tabuľkou, cenami, odoberaním
+produktov a trvalým odkazom; SEO stránky /porovnat/a-vs-b s generovaným
+title/description a canonical. "Porovnaj s podobnými" chipy na detaile
+produktu (interné prelinkovanie). Overené E2E (15 kontrol).
 
 ---
 
