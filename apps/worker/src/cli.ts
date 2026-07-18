@@ -6,6 +6,7 @@ import {
   snapshotTodayAggregates,
 } from "@app0/db";
 import { checkAlerts } from "./jobs/checkAlerts";
+import { findMatchCandidates } from "./jobs/findMatchCandidates";
 import { importAllFeeds } from "./jobs/importFeeds";
 import { processImportJobs } from "./jobs/processImportJobs";
 
@@ -15,7 +16,10 @@ const db = createDb();
 try {
   if (command === "import-feeds") {
     await importAllFeeds(db);
+    await findMatchCandidates(db);
     await snapshotTodayAggregates(db);
+  } else if (command === "match-candidates") {
+    await findMatchCandidates(db);
   } else if (command === "check-alerts") {
     await checkAlerts(db);
   } else if (command === "process-jobs") {
@@ -29,8 +33,8 @@ try {
     await pruneOldPriceHistory(db);
   } else {
     console.error(
-      "Použitie: tsx src/cli.ts " +
-        "<import-feeds|check-alerts|process-jobs|aggregate|aggregate-backfill|prune-history>",
+      "Použitie: tsx src/cli.ts <import-feeds|match-candidates|check-alerts" +
+        "|process-jobs|aggregate|aggregate-backfill|prune-history>",
     );
     process.exitCode = 1;
   }

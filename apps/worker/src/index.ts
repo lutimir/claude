@@ -3,6 +3,7 @@ import { Cron } from "croner";
 import { createDb } from "@app0/db";
 import { pruneOldPriceHistory, snapshotTodayAggregates } from "@app0/db";
 import { checkAlerts } from "./jobs/checkAlerts";
+import { findMatchCandidates } from "./jobs/findMatchCandidates";
 import { importAllFeeds } from "./jobs/importFeeds";
 import { processImportJobs } from "./jobs/processImportJobs";
 import { log } from "./lib/log";
@@ -27,6 +28,7 @@ new Cron("*/30 * * * * *", () => {
 
 new Cron("0 3 * * *", { timezone: "Europe/Bratislava" }, () => {
   importAllFeeds(db)
+    .then(() => findMatchCandidates(db))
     .then(() => snapshotTodayAggregates(db))
     .then(() => pruneOldPriceHistory(db))
     .catch((err) => log(`Denný import zlyhal: ${err}`));

@@ -1,6 +1,7 @@
 import { schema, snapshotTodayAggregates, type Db } from "@app0/db";
 import { eq, sql } from "drizzle-orm";
 import { log } from "../lib/log";
+import { findMatchCandidates } from "./findMatchCandidates";
 import { importAllFeeds, importFeedById } from "./importFeeds";
 
 const MAX_JOBS_PER_TICK = 5;
@@ -33,6 +34,7 @@ export async function processImportJobs(db: Db): Promise<void> {
       } else {
         await importAllFeeds(db);
       }
+      await findMatchCandidates(db);
       await snapshotTodayAggregates(db);
       await db
         .update(schema.importJobs)
