@@ -1,13 +1,15 @@
+import { buildPriceDropEmail, createMailer, type Mailer } from "@app0/core";
 import { schema, type Db } from "@app0/db";
 import { and, asc, eq, isNotNull, isNull } from "drizzle-orm";
-import { consoleMailer, type Mailer } from "../lib/mailer";
 import { log } from "../lib/log";
 
 /**
  * Prejde potvrdené a zatiaľ nenotifikované cenové alarmy; ak najlacnejšia
- * aktívna ponuka klesla na cieľovú cenu, pošle e-mail (zatiaľ konzolový stub).
+ * aktívna ponuka klesla na cieľovú cenu, pošle e-mail s ponukou a odkazom
+ * na správu alarmu. Provider e-mailov sa vyberá cez MAIL_PROVIDER env.
  */
-export async function checkAlerts(db: Db, mailer: Mailer = consoleMailer): Promise<void> {
+export async function checkAlerts(db: Db, mailer: Mailer = createMailer()): Promise<void> {
+  const baseUrl = process.env.APP_BASE_URL ?? "http://localhost:3000";
   const alerts = await db
     .select({ alert: schema.priceAlerts, product: schema.products })
     .from(schema.priceAlerts)
@@ -36,13 +38,15 @@ export async function checkAlerts(db: Db, mailer: Mailer = consoleMailer): Promi
 
     if (!best || Number(best.price) > Number(alert.targetPrice)) continue;
 
-    await mailer.send({
-      to: alert.email,
-      subject: `Cena klesla: ${product.name} je teraz za ${best.price} ${alert.currency}`,
-      text:
-        `Produkt ${product.name} klesol na ${best.price} ${alert.currency} ` +
-        `(tvoja cieľová cena: ${alert.targetPrice} ${alert.currency}). Ponuka: ${best.url}`,
+    const mail = buildPriceDropEmail({
+      productName: product.name,
+      price: best.price,
+      currency: alert.currency,
+      targetPrice: alert.targetPrice,
+      offerUrl: best.url,
+      manageUrl: `${baseUrl}/alarm/${alert.token}`,
     });
+    await mailer.send({ to: alert.email, ...mail });
     await db
       .update(schema.priceAlerts)
       .set({ notifiedAt: new Date() })
