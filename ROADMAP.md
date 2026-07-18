@@ -44,24 +44,17 @@ bežnou cenou. Overené E2E cez Playwright.
 
 ---
 
-## ⬜ Fáza 3 — Cenové alarmy end-to-end
+## ✅ Fáza 3 — Cenové alarmy end-to-end (hotová)
 
-**Cieľ:** funkčný watchdog s e-mailami.
-**Rozsah:** napojenie reálneho e-mail providera (SMTP alebo Resend — rozhranie
-Mailer už existuje v apps/worker/src/lib/mailer.ts), double opt-in (potvrdenie
-alarmu tokenom — stĺpce token/confirmed_at už v schéme), unsubscribe odkaz,
-šablóny e-mailov po slovensky, rate limiting formulára, stránka správy alarmu.
-**Hotové keď:** alarm sa potvrdí e-mailom a notifikácia príde pri poklese ceny.
-
-**Prompt:**
-```text
-Pokračuj v projekte App0 (pozri README.md a ROADMAP.md — Fáza 3). Dokonči cenové
-alarmy: napoj e-mail provider cez existujúce Mailer rozhranie (Resend alebo SMTP,
-konfigurovateľné cez env), double opt-in potvrdenie cez token (stĺpce už existujú
-v price_alerts), unsubscribe odkaz, slovenské e-mail šablóny a rate limiting
-formulára. Server action v apps/web zmeň tak, aby alarm vznikal nepotvrdený.
-Po dokončení aktualizuj ROADMAP.md a commitni.
-```
+Mail modul v `packages/core`: provider cez `MAIL_PROVIDER` env — console (dev),
+Resend (HTTP API bez závislostí), SMTP (nodemailer, lenivo načítaný). Double
+opt-in: alarm vzniká nepotvrdený, potvrdzuje sa odkazom z e-mailu
+(`/alarm/[token]?akcia=potvrdit`); opakované nastavenie len aktualizuje cieľovú
+cenu. Stránka správy alarmu `/alarm/[token]`: stav, potvrdenie, "strážiť znova"
+po notifikácii, zrušenie (vymaže e-mail). Notifikácia obsahuje ponuku aj odkaz
+na správu. Slovenské šablóny (core/mail/templates), rate limit 5 alarmov/IP/h.
+Overené E2E: formulár → e-mail → potvrdenie → pokles ceny → notifikácia →
+re-arm → zrušenie → rate limit.
 
 ---
 

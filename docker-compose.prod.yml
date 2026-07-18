@@ -25,6 +25,11 @@ services:
       ADMIN_USER: ${ADMIN_USER}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD}
       NEXT_PUBLIC_APP_NAME: ${NEXT_PUBLIC_APP_NAME:-App0}
+      APP_BASE_URL: ${APP_BASE_URL}
+      MAIL_PROVIDER: ${MAIL_PROVIDER:-console}
+      MAIL_FROM: ${MAIL_FROM}
+      RESEND_API_KEY: ${RESEND_API_KEY}
+      SMTP_URL: ${SMTP_URL}
     ports:
       - "3000:3000"
     depends_on:
@@ -39,6 +44,11 @@ services:
     environment:
       DATABASE_URL: postgres://${POSTGRES_USER:-app0}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-app0}
       FEED_FETCH_CONTACT: ${FEED_FETCH_CONTACT}
+      APP_BASE_URL: ${APP_BASE_URL}
+      MAIL_PROVIDER: ${MAIL_PROVIDER:-console}
+      MAIL_FROM: ${MAIL_FROM}
+      RESEND_API_KEY: ${RESEND_API_KEY}
+      SMTP_URL: ${SMTP_URL}
     depends_on:
       postgres:
         condition: service_healthy

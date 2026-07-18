@@ -93,4 +93,5 @@ CI/CD, zálohy, monitoring a hardening rieši fáza 9 roadmapy.
 
 Pozri [.env.example](./.env.example). V produkcii nastav silné `ADMIN_PASSWORD`
 a `POSTGRES_PASSWORD`; `FEED_FETCH_CONTACT` musí byť reálna adresa, na ktorej ťa
-obchody zastihnú.
+obchody zastihnú. E-maily cenových alarmov posiela `MAIL_PROVIDER`
+(console/resend/smtp) — v produkcii nastav aj `APP_BASE_URL` a `MAIL_FROM`.
