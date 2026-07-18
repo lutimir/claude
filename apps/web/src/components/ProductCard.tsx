@@ -1,5 +1,7 @@
 import Link from "next/link";
+import { Suspense } from "react";
 import { getTranslations } from "next-intl/server";
+import { CompareToggle } from "@/components/CompareToggle";
 import { formatPrice } from "@/lib/format";
 import type { ProductCardData } from "@/lib/queries";
 
@@ -8,8 +10,15 @@ export async function ProductCard({ product }: { product: ProductCardData }) {
   return (
     <Link
       href={`/produkt/${product.slug}`}
-      className="group flex flex-col gap-3 rounded-xl border border-neutral-200 bg-white p-4 transition hover:border-emerald-500/50 hover:shadow-md dark:border-neutral-800 dark:bg-neutral-900"
+      className="group relative flex flex-col gap-3 rounded-xl border border-neutral-200 bg-white p-4 transition hover:border-emerald-500/50 hover:shadow-md dark:border-neutral-800 dark:bg-neutral-900"
     >
+      <Suspense fallback={null}>
+        <CompareToggle
+          productId={product.id}
+          label={t("compareToggle")}
+          activeLabel={t("inCompare")}
+        />
+      </Suspense>
       <div className="flex h-32 items-center justify-center overflow-hidden rounded-lg bg-neutral-100 dark:bg-neutral-800">
         {product.imageUrl ? (
           // eslint-disable-next-line @next/next/no-img-element

@@ -7,7 +7,22 @@
     "noOffers": "momentálne bez ponuky",
     "offersCount": "{count, plural, =0 {žiadna ponuka} one {# ponuka} few {# ponuky} other {# ponúk}}",
     "toShop": "Do obchodu",
-    "backHome": "Späť na úvod"
+    "backHome": "Späť na úvod",
+    "compareToggle": "Porovnať",
+    "inCompare": "V porovnaní",
+    "compareCta": "Porovnať produkty",
+    "clearCompare": "Zrušiť výber"
+  },
+  "compare": {
+    "title": "Porovnanie produktov",
+    "needTwo": "Vyber aspoň dva produkty na porovnanie — klikni na ⇄ na karte produktu.",
+    "browse": "Prezerať produkty",
+    "price": "Najlepšia cena",
+    "remove": "Odobrať",
+    "permalink": "Trvalý odkaz na porovnanie",
+    "diffHint": "Zvýraznené riadky = parametre, v ktorých sa produkty líšia alebo niektorému chýbajú.",
+    "seoDescription": "Porovnanie {first} (od {firstPrice}) a {second} (od {secondPrice}): parametre vedľa seba, rozdiely a najlepšie ceny z obchodov.",
+    "vsSuggestions": "Porovnaj s podobnými"
   },
   "home": {
     "heroTitle": "Nájdi najlepšiu cenu elektroniky",

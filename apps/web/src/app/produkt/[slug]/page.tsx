@@ -7,7 +7,12 @@ import { InteractivePriceChart } from "@/components/InteractivePriceChart";
 import { OffersTable } from "@/components/OffersTable";
 import { getDb } from "@/lib/db";
 import { formatPrice } from "@/lib/format";
-import { getDailyPrices, getFairPriceInfo, getProductBySlug } from "@/lib/queries";
+import {
+  getCompareSuggestions,
+  getDailyPrices,
+  getFairPriceInfo,
+  getProductBySlug,
+} from "@/lib/queries";
 
 export const dynamic = "force-dynamic";
 
@@ -26,6 +31,7 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
 
 export default async function ProductPage({ params, searchParams }: ProductPageProps) {
   const t = await getTranslations("product");
+  const tCompare = await getTranslations("compare");
   const { slug } = await params;
   const { alarm, obdobie } = await searchParams;
 
@@ -36,9 +42,10 @@ export default async function ProductPage({ params, searchParams }: ProductPageP
   const range = (CHART_RANGES as readonly number[]).includes(Number(obdobie))
     ? Number(obdobie)
     : 90;
-  const [history, fairPrice] = await Promise.all([
+  const [history, fairPrice, compareSuggestions] = await Promise.all([
     getDailyPrices(db, product.id, range),
     getFairPriceInfo(db, product.id),
+    getCompareSuggestions(db, product.id, product.categoryId),
   ]);
   const eurPrices = product.offers
     .filter((offer) => offer.currency === "EUR")
@@ -153,6 +160,23 @@ export default async function ProductPage({ params, searchParams }: ProductPageP
         </div>
         <AlertForm productId={product.id} slug={product.slug} status={alarm} />
       </section>
+
+      {compareSuggestions.length > 0 ? (
+        <section>
+          <h2 className="mb-3 text-lg font-semibold">{tCompare("vsSuggestions")}</h2>
+          <div className="flex flex-wrap gap-2">
+            {compareSuggestions.map((suggestion) => (
+              <Link
+                key={suggestion.id}
+                href={`/porovnat/${product.slug}-vs-${suggestion.slug}`}
+                className="rounded-full border border-neutral-200 bg-white px-4 py-2 text-sm transition hover:border-emerald-500/50 hover:text-emerald-700 dark:border-neutral-800 dark:bg-neutral-900 dark:hover:text-emerald-400"
+              >
+                vs {suggestion.name}
+              </Link>
+            ))}
+          </div>
+        </section>
+      ) : null}
 
       {paramEntries.length > 0 ? (
         <section>

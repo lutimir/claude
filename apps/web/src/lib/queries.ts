@@ -288,6 +288,72 @@ export async function getImportJobs(db: Db, limit = 10) {
     .limit(limit);
 }
 
+// ---------------------------------------------------------------------------
+// Porovnanie produktov
+// ---------------------------------------------------------------------------
+
+export interface ComparisonProduct {
+  id: number;
+  name: string;
+  slug: string;
+  imageUrl: string | null;
+  brandName: string | null;
+  params: Record<string, string>;
+  minPrice: string | null;
+  offerCount: number;
+}
+
+export async function getProductsForComparison(db: Db, ids: number[]): Promise<ComparisonProduct[]> {
+  if (ids.length === 0) return [];
+  const rows = await db
+    .select({ ...productCardSelect, params: schema.products.params })
+    .from(schema.products)
+    .leftJoin(schema.brands, eq(schema.products.brandId, schema.brands.id))
+    .leftJoin(schema.offers, eq(schema.offers.productId, schema.products.id))
+    .where(inArray(schema.products.id, ids))
+    .groupBy(schema.products.id, schema.brands.name);
+  // zachovaj poradie z URL
+  return ids
+    .map((id) => rows.find((row) => row.id === id))
+    .filter((row): row is (typeof rows)[number] => row !== undefined);
+}
+
+export async function getProductSlugs(db: Db, slugs: string[]) {
+  return db.query.products.findMany({
+    where: inArray(schema.products.slug, slugs),
+    columns: { id: true, slug: true },
+  });
+}
+
+/** Alias → kanonický názov parametra (číselník param_aliases). */
+export async function getParamAliasMap(db: Db): Promise<Map<string, string>> {
+  const rows = await db.select().from(schema.paramAliases);
+  return new Map(rows.map((row) => [row.alias, row.canonical]));
+}
+
+/** Návrhy na porovnanie: najponúkanejšie produkty z rovnakej kategórie. */
+export async function getCompareSuggestions(
+  db: Db,
+  productId: number,
+  categoryId: number | null,
+  limit = 3,
+) {
+  if (categoryId === null) return [];
+  return db
+    .select({
+      id: schema.products.id,
+      name: schema.products.name,
+      slug: schema.products.slug,
+      offerCount: sql<number>`count(${schema.offers.id}) filter (where ${schema.offers.active})`.mapWith(Number),
+    })
+    .from(schema.products)
+    .leftJoin(schema.offers, eq(schema.offers.productId, schema.products.id))
+    .where(and(eq(schema.products.categoryId, categoryId), sql`${schema.products.id} <> ${productId}`))
+    .groupBy(schema.products.id)
+    .orderBy(sql`count(${schema.offers.id}) filter (where ${schema.offers.active}) desc`)
+    .limit(limit);
+}
+
 /** Nespárované aktívne ponuky s navrhnutými kandidátmi pre admin frontu. */
 export async function getUnmatchedOffers(db: Db, limit = 50) {
   return db.query.offers.findMany({
