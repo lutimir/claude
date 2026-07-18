@@ -1,5 +1,5 @@
 import { schema, type Db } from "@app0/db";
-import { and, asc, count, desc, eq, isNotNull, isNull, sql } from "drizzle-orm";
+import { and, asc, count, desc, eq, inArray, isNotNull, isNull, sql } from "drizzle-orm";
 
 export interface ProductCardData {
   id: number;
@@ -189,4 +189,33 @@ export async function getShopsWithFeeds(db: Db) {
     with: { feeds: true },
     orderBy: [asc(schema.shops.name)],
   });
+}
+
+export async function getShopWithFeeds(db: Db, id: number) {
+  return db.query.shops.findFirst({
+    where: eq(schema.shops.id, id),
+    with: { feeds: true },
+  });
+}
+
+export async function getImportJobs(db: Db, limit = 10) {
+  return db
+    .select({
+      job: schema.importJobs,
+      feedUrl: schema.feeds.url,
+      shopName: schema.shops.name,
+    })
+    .from(schema.importJobs)
+    .leftJoin(schema.feeds, eq(schema.importJobs.feedId, schema.feeds.id))
+    .leftJoin(schema.shops, eq(schema.feeds.shopId, schema.shops.id))
+    .orderBy(desc(schema.importJobs.requestedAt))
+    .limit(limit);
+}
+
+export async function hasActiveImportJobs(db: Db): Promise<boolean> {
+  const [row] = await db
+    .select({ value: count() })
+    .from(schema.importJobs)
+    .where(inArray(schema.importJobs.status, ["pending", "running"]));
+  return row!.value > 0;
 }
