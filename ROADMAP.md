@@ -19,24 +19,15 @@ identifikačný User-Agent), full-text vyhľadávanie bez diakritiky, admin sekc
 
 ---
 
-## ⬜ Fáza 1 — Onboarding reálnych obchodov
+## ✅ Fáza 1 — Onboarding reálnych obchodov (hotová)
 
-**Cieľ:** pripojiť prvé skutočné obchody bez ručného SQL.
-**Rozsah:** admin CRUD pre obchody a feedy (formuláre + server actions),
-validátor feedu (stiahni, naparsuj, ukáž náhľad položiek a chyby pred uložením),
-tlačidlo "spustiť import teraz" v admine (job queue cez DB tabuľku alebo triggnutie
-workera), evidencia súhlasov (upload/poznámka), stavové prehľady feedov.
-**Hotové keď:** nový obchod sa dá pridať, zvalidovať a naimportovať čisto cez /admin.
-
-**Prompt:**
-```text
-Pokračuj v projekte App0 (porovnávač cien, pozri README.md a ROADMAP.md — Fáza 1).
-Priprav onboarding reálnych obchodov: admin CRUD pre obchody a feedy so server
-actions a zod validáciou, validátor feedu s náhľadom naparsovaných položiek pred
-uložením, tlačidlo "spustiť import teraz", a evidenciu súhlasu obchodu (dátum +
-poznámka + kontakt). Dodrž compliance model z packages/core (import len so
-súhlasom). Po dokončení aktualizuj ROADMAP.md a commitni.
-```
+Admin CRUD pre obchody a feedy (server actions + zod), validátor feedu
+s náhľadom (položky, EAN štatistiky, varovania) pred uložením, evidencia
+súhlasu (dátum + poznámka + kontaktná osoba, `consent_contact`), manuálny
+import cez frontu `import_jobs` (worker ju spracúva každých 30 s, FOR UPDATE
+SKIP LOCKED), auto-refresh stránky importov. `fetchFeedXml` presunutý do
+`packages/core` (zdieľa ho worker aj web). Overené E2E cez Playwright:
+obchod → feed → validácia → uloženie → import → produkt na webe.
 
 ---
 

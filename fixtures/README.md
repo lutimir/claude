@@ -1,6 +1,11 @@
 # Testovacie feedy
 
-Lokálne overenie celej import pipeline (stiahnutie → parsovanie → párovanie → ceny):
+Lokálne overenie celej import pipeline (stiahnutie → parsovanie → párovanie → ceny).
+
+Najjednoduchšie cez admin: spusti `python3 -m http.server 8787 --directory fixtures`,
+v `/admin/obchody` pridaj obchod a feed `http://localhost:8787/demo-feed.xml`
+(zvaliduj, potvrď súhlas, ulož) a klikni **Importovať teraz** (frontu spracúva
+`pnpm worker`). Alternatíva cez SQL a CLI:
 
 ```bash
 # 1. Servuj fixtures na porte 8787

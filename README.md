@@ -71,11 +71,17 @@ Test celej import pipeline na lokálnom feede: [fixtures/README.md](./fixtures/R
 
 ## Pridanie reálneho obchodu
 
+Celé cez admin, bez SQL:
+
 1. Dohodni si s obchodom použitie jeho produktového feedu (Heureka XML formát —
    obchody ho už väčšinou majú) a **zdokumentuj súhlas**.
-2. Vlož obchod + feed do DB (admin CRUD prichádza vo fáze 1):
-   `legal_basis`, `consent_confirmed_at` a `consent_note` sú povinné pre import.
-3. Spusti `pnpm import:feeds` a skontroluj `/admin/importy`.
+2. `/admin/obchody` → **Pridať obchod** (názov, web, právny základ).
+3. Na detaile obchodu **Pridať feed**: vlož URL, **Zvalidovať feed** (stiahne sa
+   a ukáže náhľad položiek, EAN štatistiky a varovania), zaškrtni potvrdený
+   súhlas + poznámku a kontakt, ulož. Bez potvrdeného súhlasu sa feed
+   neimportuje — ani manuálne.
+4. **Importovať teraz** — požiadavka ide do fronty (`import_jobs`), ktorú
+   spracúva bežiaci worker (`pnpm worker`). Výsledok sleduj v `/admin/importy`.
 
 ## Produkčné nasadenie
 
