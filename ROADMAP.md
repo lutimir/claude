@@ -86,22 +86,16 @@ produktu (interné prelinkovanie). Overené E2E (15 kontrol).
 
 ---
 
-## ⬜ Fáza 6 — Hodnotenia obchodov
+## ✅ Fáza 6 — Hodnotenia obchodov (hotová)
 
-**Cieľ:** dôveryhodnosť obchodov.
-**Rozsah:** formulár recenzie s e-mail verifikáciou (tabuľka shop_reviews so
-statusom už existuje), moderácia v admine, agregovaný rating pri ponukách,
-anti-spam (rate limit, honeypot).
-**Hotové keď:** overená recenzia sa po schválení zobrazuje pri obchode.
-
-**Prompt:**
-```text
-Pokračuj v projekte App0 (pozri README.md a ROADMAP.md — Fáza 6). Sprav hodnotenia
-obchodov: verejný formulár s overením e-mailu, moderácia (schváliť/zamietnuť)
-v admine, agregovaný rating obchodu zobrazený v tabuľke ponúk a na stránke obchodu,
-anti-spam ochrany. Tabuľka shop_reviews so statusmi už existuje. Po dokončení
-aktualizuj ROADMAP.md a commitni.
-```
+Verejná stránka obchodu /obchod/[slug]: agregovaný rating (hviezdičky, priemer,
+počet), schválené recenzie a formulár hodnotenia (1–5★, text, e-mail sa nikdy
+nezverejňuje). Trojstupňový flow: e-mail verifikácia tokenom (/recenzia/[token])
+→ moderácia v admine (/admin/recenzie, schváliť/zamietnuť) → zverejnenie.
+Anti-spam: honeypot pole (bot dostane falošný úspech) + rate limit 3/IP/h.
+Rating obchodu sa zobrazuje aj pri ponukách na detaile produktu s odkazom na
+stránku obchodu. Seed obsahuje ukážkové recenzie. Overené E2E (16 kontrol
+vrátane honeypotu a zamietnutia).
 
 ---
 
