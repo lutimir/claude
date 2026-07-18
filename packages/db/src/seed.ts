@@ -314,6 +314,26 @@ async function main() {
     }
   }
 
+  console.log("Vkladám ukážkové recenzie obchodov…");
+  const demoReviews = [
+    { shop: techMarket!, rating: 5, text: "Rýchle doručenie, tovar dorazil na druhý deň. Odporúčam." },
+    { shop: techMarket!, rating: 4, text: "Dobré ceny, komunikácia mohla byť rýchlejšia." },
+    { shop: techMarket!, rating: 5, text: "Bezproblémová reklamácia, vybavená do týždňa." },
+    { shop: elektroDom!, rating: 4, text: "Solídny obchod, balenie v poriadku." },
+    { shop: elektroDom!, rating: 3, text: "Tovar ok, ale doručenie meškalo dva dni." },
+  ];
+  await db.insert(schema.shopReviews).values(
+    demoReviews.map((review, index) => ({
+      shopId: review.shop.id,
+      email: `zakaznik${index + 1}@example.com`,
+      rating: review.rating,
+      text: review.text,
+      status: "approved" as const,
+      token: crypto.randomUUID(),
+      verifiedAt: new Date(),
+    })),
+  );
+
   console.log("Vkladám aliasy parametrov…");
   await db.insert(schema.paramAliases).values([
     { alias: "ulozisko", canonical: "Pamäť" },

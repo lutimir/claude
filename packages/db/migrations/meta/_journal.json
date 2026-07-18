@@ -50,6 +50,13 @@
       "when": 1784395135834,
       "tag": "0006_fat_leader",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1784404614118,
+      "tag": "0007_useful_logan",
+      "breakpoints": true
     }
   ]
 }

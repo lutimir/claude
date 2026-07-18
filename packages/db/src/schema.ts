@@ -335,6 +335,9 @@ export const shopReviews = pgTable(
     rating: integer("rating").notNull(),
     text: text("text"),
     status: reviewStatusEnum("status").notNull().default("pending"),
+    /** Token na overenie e-mailu — do moderácie idú len overené recenzie */
+    token: text("token").unique(),
+    verifiedAt: timestamp("verified_at", { withTimezone: true }),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [index("shop_reviews_shop_idx").on(t.shopId)],
