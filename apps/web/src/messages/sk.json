@@ -156,7 +156,13 @@
     "jobsEmpty": "Žiadne manuálne importy vo fronte.",
     "workerHint": "Frontu spracúva worker (pnpm worker alebo pnpm --filter @app0/worker run start) — bez neho joby ostanú čakať.",
     "actions": "Akcie",
-    "edit": "Upraviť"
+    "edit": "Upraviť",
+    "matching": "Párovanie",
+    "matchingEmpty": "Žiadne nespárované ponuky — všetko je priradené k produktom.",
+    "matchingHint": "Kandidátov navrhuje similarity nad normalizovanými názvami (pg_trgm). Spárovať priradí ponuku k produktu; Zamietnuť pár natrvalo zablokuje a už sa nenavrhne.",
+    "matchingNoCandidates": "Bez kandidátov — počkaj na ďalší beh párovania alebo doplnenie katalógu.",
+    "matchingConfirm": "Spárovať",
+    "matchingReject": "Zamietnuť"
   },
   "legal": {
     "termsTitle": "Podmienky používania",

@@ -288,6 +288,22 @@ export async function getImportJobs(db: Db, limit = 10) {
     .limit(limit);
 }
 
+/** Nespárované aktívne ponuky s navrhnutými kandidátmi pre admin frontu. */
+export async function getUnmatchedOffers(db: Db, limit = 50) {
+  return db.query.offers.findMany({
+    where: and(eq(schema.offers.active, true), eq(schema.offers.matchStatus, "unmatched")),
+    with: {
+      shop: { columns: { name: true } },
+      matchCandidates: {
+        with: { product: { columns: { id: true, name: true, slug: true } } },
+        orderBy: [desc(schema.matchCandidates.score)],
+      },
+    },
+    orderBy: [desc(schema.offers.lastSeenAt)],
+    limit,
+  });
+}
+
 export async function hasActiveImportJobs(db: Db): Promise<boolean> {
   const [row] = await db
     .select({ value: count() })
