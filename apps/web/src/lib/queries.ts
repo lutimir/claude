@@ -132,28 +132,104 @@ export async function getProductBySlug(db: Db, slug: string) {
 
 export interface PricePoint {
   day: string;
-  price: number;
+  min: number;
+  avg: number;
 }
 
-/** Denné minimum ceny naprieč všetkými ponukami produktu (EUR, 90 dní). */
-export async function getDailyPriceHistory(db: Db, productId: number): Promise<PricePoint[]> {
+/** Denné agregáty cien produktu (EUR) za zvolené obdobie. */
+export async function getDailyPrices(db: Db, productId: number, days: number): Promise<PricePoint[]> {
   const rows = await db
     .select({
-      day: sql<string>`to_char(date_trunc('day', ${schema.priceHistory.recordedAt}), 'YYYY-MM-DD')`,
-      price: sql<string>`min(${schema.priceHistory.price})`,
+      day: sql<string>`to_char(${schema.productPriceDaily.day}, 'YYYY-MM-DD')`,
+      min: schema.productPriceDaily.minPrice,
+      avg: schema.productPriceDaily.avgPrice,
     })
-    .from(schema.priceHistory)
-    .innerJoin(schema.offers, eq(schema.priceHistory.offerId, schema.offers.id))
+    .from(schema.productPriceDaily)
     .where(
       and(
-        eq(schema.offers.productId, productId),
-        eq(schema.priceHistory.currency, "EUR"),
-        sql`${schema.priceHistory.recordedAt} > now() - interval '90 days'`,
+        eq(schema.productPriceDaily.productId, productId),
+        eq(schema.productPriceDaily.currency, "EUR"),
+        sql`${schema.productPriceDaily.day} > current_date - ${days}::int`,
       ),
     )
-    .groupBy(sql`1`)
-    .orderBy(sql`1`);
-  return rows.map((row) => ({ day: row.day, price: Number(row.price) }));
+    .orderBy(asc(schema.productPriceDaily.day));
+  return rows.map((row) => ({ day: row.day, min: Number(row.min), avg: Number(row.avg) }));
+}
+
+export interface FairPriceInfo {
+  /** Priemer denných miním za posledných 30 dní ("bežná cena") */
+  fairPrice: number;
+  /** Počet dní s dátami — pod 5 sa bežná cena nezobrazuje */
+  days: number;
+}
+
+export async function getFairPriceInfo(db: Db, productId: number): Promise<FairPriceInfo | null> {
+  const [row] = await db
+    .select({
+      fairPrice: sql<string | null>`round(avg(${schema.productPriceDaily.minPrice}), 2)`,
+      days: count(),
+    })
+    .from(schema.productPriceDaily)
+    .where(
+      and(
+        eq(schema.productPriceDaily.productId, productId),
+        eq(schema.productPriceDaily.currency, "EUR"),
+        sql`${schema.productPriceDaily.day} > current_date - 30`,
+      ),
+    );
+  if (!row || row.days < 5 || row.fairPrice === null) return null;
+  return { fairPrice: Number(row.fairPrice), days: row.days };
+}
+
+export interface PriceDrop {
+  id: number;
+  name: string;
+  slug: string;
+  imageUrl: string | null;
+  brandName: string | null;
+  currentPrice: number;
+  fairPrice: number;
+  dropPct: number;
+  offerCount: number;
+}
+
+/**
+ * Produkty s aktuálnou najnižšou cenou výrazne pod 30-dňovým priemerom.
+ * Vyžaduje aspoň 5 dní dát — chráni pred "zľavami" z jednodňovej histórie.
+ */
+export async function getTopPriceDrops(db: Db, limit = 4): Promise<PriceDrop[]> {
+  const rows = await db.execute(sql`
+    select p.id, p.name, p.slug, p.image_url, b.name as brand_name,
+           cur.min_price as current_price, cur.offer_count,
+           agg.avg30 as fair_price,
+           round((1 - cur.min_price / agg.avg30) * 100, 1) as drop_pct
+    from products p
+    left join brands b on b.id = p.brand_id
+    join lateral (
+      select min(o.price) as min_price, count(*) as offer_count
+      from offers o
+      where o.product_id = p.id and o.active and o.currency = 'EUR'
+    ) cur on cur.min_price is not null
+    join lateral (
+      select round(avg(d.min_price), 2) as avg30, count(*) as days
+      from product_price_daily d
+      where d.product_id = p.id and d.currency = 'EUR' and d.day > current_date - 30
+    ) agg on agg.days >= 5 and agg.avg30 > 0
+    where cur.min_price < agg.avg30 * 0.98
+    order by drop_pct desc
+    limit ${limit}
+  `);
+  return (rows as unknown as Record<string, unknown>[]).map((row) => ({
+    id: Number(row.id),
+    name: String(row.name),
+    slug: String(row.slug),
+    imageUrl: (row.image_url as string | null) ?? null,
+    brandName: (row.brand_name as string | null) ?? null,
+    currentPrice: Number(row.current_price),
+    fairPrice: Number(row.fair_price),
+    dropPct: Number(row.drop_pct),
+    offerCount: Number(row.offer_count),
+  }));
 }
 
 // ---------------------------------------------------------------------------

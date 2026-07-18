@@ -16,7 +16,8 @@
     "statsOffers": "ponúk",
     "statsShops": "obchodov",
     "categories": "Kategórie",
-    "latestProducts": "Najnovšie v katalógu"
+    "latestProducts": "Najnovšie v katalógu",
+    "priceDrops": "Najväčšie poklesy cien"
   },
   "search": {
     "title": "Výsledky hľadania",
@@ -34,8 +35,17 @@
     "price": "Cena",
     "params": "Parametre",
     "ean": "EAN",
-    "historyTitle": "Vývoj najnižšej ceny (90 dní)",
+    "historyTitle": "Vývoj najnižšej ceny",
     "historyEmpty": "História cien sa ešte len zbiera.",
+    "range30": "30 dní",
+    "range90": "90 dní",
+    "range365": "Rok",
+    "chartMin": "najnižšia cena",
+    "chartAvg": "priemer ponúk",
+    "fairPrice": "Bežná cena (30 dní)",
+    "belowFair": "{pct} % pod bežnou cenou",
+    "aboveFair": "{pct} % nad bežnou cenou",
+    "atFair": "na úrovni bežnej ceny",
     "alertTitle": "Strážiť cenu",
     "alertDescription": "Pošleme ti e-mail, keď cena klesne pod tvoju hranicu.",
     "alertEmail": "Tvoj e-mail",

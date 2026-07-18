@@ -1,18 +1,25 @@
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
+import { PriceDropCard } from "@/components/PriceDropCard";
 import { ProductGrid } from "@/components/ProductGrid";
 import { getDb } from "@/lib/db";
-import { getCategoriesWithCounts, getLatestProducts, getStats } from "@/lib/queries";
+import {
+  getCategoriesWithCounts,
+  getLatestProducts,
+  getStats,
+  getTopPriceDrops,
+} from "@/lib/queries";
 
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
   const t = await getTranslations("home");
   const db = getDb();
-  const [stats, categories, latestProducts] = await Promise.all([
+  const [stats, categories, latestProducts, priceDrops] = await Promise.all([
     getStats(db),
     getCategoriesWithCounts(db),
     getLatestProducts(db),
+    getTopPriceDrops(db, 4),
   ]);
 
   const statItems = [
@@ -51,6 +58,17 @@ export default async function HomePage() {
           ))}
         </div>
       </section>
+
+      {priceDrops.length > 0 ? (
+        <section>
+          <h2 className="mb-4 text-xl font-semibold">{t("priceDrops")}</h2>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+            {priceDrops.map((drop) => (
+              <PriceDropCard key={drop.id} drop={drop} />
+            ))}
+          </div>
+        </section>
+      ) : null}
 
       <section>
         <h2 className="mb-4 text-xl font-semibold">{t("latestProducts")}</h2>
