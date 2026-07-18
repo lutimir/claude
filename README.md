@@ -87,8 +87,9 @@ Celé cez admin, bez SQL:
 
 ## Produkčné nasadenie
 
-`docker-compose.prod.yml` obsahuje web (standalone Next.js), worker a PostgreSQL.
-CI/CD, zálohy, monitoring a hardening rieši fáza 9 roadmapy.
+Kompletný produkčný stack (Caddy HTTPS, migrácie pri deployi, denné zálohy,
+healthchecky, CI/CD cez GitHub Actions) — postup krok za krokom v
+**[DEPLOY.md](./DEPLOY.md)**.
 
 ## Environment premenné
 

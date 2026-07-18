@@ -1,0 +1,6 @@
+# HTTPS reverse proxy — certifikáty vybavuje Caddy automaticky (Let's Encrypt).
+# DOMAIN nastav v .env (napr. app0.sk); bez domény beží na localhost bez TLS.
+{$DOMAIN:localhost} {
+	encode gzip
+	reverse_proxy web:3000
+}

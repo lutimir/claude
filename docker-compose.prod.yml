@@ -1,5 +1,5 @@
-# Produkčné nasadenie na VPS (fáza 9 roadmapy doplní CI/CD, zálohy a monitoring).
-# Spustenie: docker compose -f docker-compose.prod.yml up -d --build
+# Produkčné nasadenie na VPS — kompletný stack s HTTPS, migráciami a zálohami.
+# Postup: pozri DEPLOY.md. Spustenie: docker compose -f docker-compose.prod.yml up -d --build
 services:
   postgres:
     image: postgres:17-alpine
@@ -16,6 +16,19 @@ services:
       timeout: 5s
       retries: 10
 
+  # Jednorazová služba: aplikuje migrácie pred štartom webu a workera
+  migrate:
+    build:
+      context: .
+      dockerfile: apps/worker/Dockerfile
+    command: ["pnpm", "--filter", "@app0/db", "run", "db:migrate"]
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER:-app0}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-app0}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: "no"
+
   web:
     build:
       context: .
@@ -31,12 +44,16 @@ services:
       RESEND_API_KEY: ${RESEND_API_KEY}
       SMTP_URL: ${SMTP_URL}
       REVALIDATE_SECRET: ${REVALIDATE_SECRET}
-    ports:
-      - "3000:3000"
     depends_on:
-      postgres:
-        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:3000/api/health || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
 
   worker:
     build:
@@ -52,9 +69,49 @@ services:
       SMTP_URL: ${SMTP_URL}
       REVALIDATE_SECRET: ${REVALIDATE_SECRET}
     depends_on:
+      migrate:
+        condition: service_completed_successfully
+    restart: unless-stopped
+
+  caddy:
+    image: caddy:2-alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      DOMAIN: ${DOMAIN:-localhost}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - web
+    restart: unless-stopped
+
+  # Denné zálohy s rotáciou (držíme posledných 14)
+  backup:
+    image: postgres:17-alpine
+    environment:
+      PGPASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - backups:/backups
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        while true; do
+          pg_dump -h postgres -U ${POSTGRES_USER:-app0} ${POSTGRES_DB:-app0} \
+            | gzip > /backups/app0-$$(date +%F-%H%M).sql.gz \
+            && echo "Záloha hotová: app0-$$(date +%F-%H%M).sql.gz"
+          ls -1t /backups/*.sql.gz 2>/dev/null | tail -n +15 | xargs -r rm
+          sleep 86400
+        done
+    depends_on:
       postgres:
         condition: service_healthy
     restart: unless-stopped
 
 volumes:
   pgdata:
+  caddy_data:
+  caddy_config:
+  backups:

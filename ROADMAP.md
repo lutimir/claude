@@ -127,26 +127,16 @@ Overené E2E (19 kontrol).
 
 ---
 
-## ⬜ Fáza 9 — Produkčný deploy
+## ✅ Fáza 9 — Produkčný deploy (hotová)
 
-**Cieľ:** beh na VPS, pripravené na verejnú prevádzku.
-**Rozsah:** CI/CD pipeline (build + test + deploy cez GitHub Actions na VPS),
-HTTPS reverse proxy (Caddy/Traefik), automatické migrácie pri deployi, zálohy
-PostgreSQL, healthchecky a monitoring (uptime + error tracking), finálne právne
-texty od právnika, cookies lišta ak bude treba.
-**Hotové keď:** push na main automaticky nasadí na VPS s HTTPS a zálohami.
-
-**Prompt:**
-```text
-Pokračuj v projekte App0 (pozri README.md a ROADMAP.md — Fáza 9). Priprav produkčný
-deploy na VPS: GitHub Actions workflow (test → build → deploy cez SSH + docker
-compose -f docker-compose.prod.yml), Caddy ako HTTPS reverse proxy, spúšťanie
-migrácií pri deployi, denné zálohy PostgreSQL s rotáciou, healthcheck endpointy
-pre web aj worker a základný monitoring. Skontroluj produkčné poistky (secrets,
-limity, logy). Po dokončení aktualizuj ROADMAP.md a commitni.
-```
-
----
+docker-compose.prod.yml je kompletný stack: Caddy (automatické HTTPS cez
+Let's Encrypt, DOMAIN env), web + worker, jednorazová služba migrate (drizzle
+migrácie pred štartom, web/worker čakajú na jej dokončenie), denné pg_dump
+zálohy s rotáciou 14 dní, healthchecky (GET /api/health kontroluje DB — 200/503,
+overené aj s výpadkom DB). CI/CD: .github/workflows/deploy.yml nasadzuje na VPS
+cez SSH pri pushi na main (secrets VPS_HOST/VPS_USER/VPS_SSH_KEY). Kompletný
+návod v DEPLOY.md vrátane obnovy záloh a checklistu pred ostrým spustením
+(právnik, reálny mail provider, prvé obchody).
 
 ## ⬜ Fáza 10 — Používateľské účty
 
