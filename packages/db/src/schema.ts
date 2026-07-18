@@ -36,6 +36,12 @@ export const legalBasisEnum = pgEnum("legal_basis", [
 
 export const feedFormatEnum = pgEnum("feed_format", ["heureka_xml"]);
 export const feedRunStatusEnum = pgEnum("feed_run_status", ["running", "success", "error"]);
+export const importJobStatusEnum = pgEnum("import_job_status", [
+  "pending",
+  "running",
+  "success",
+  "error",
+]);
 
 export const offerMatchStatusEnum = pgEnum("offer_match_status", [
   "matched_ean", // spárované cez EAN/GTIN
@@ -74,6 +80,8 @@ export const feeds = pgTable("feeds", {
   /** Kedy obchod potvrdil, že jeho feed smieme používať. Bez toho sa neimportuje. */
   consentConfirmedAt: timestamp("consent_confirmed_at", { withTimezone: true }),
   consentNote: text("consent_note"),
+  /** Kto súhlas potvrdil (meno / e-mail kontaktnej osoby obchodu) */
+  consentContact: text("consent_contact"),
   lastRunAt: timestamp("last_run_at", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
@@ -96,6 +104,24 @@ export const feedRuns = pgTable(
     errorMessage: text("error_message"),
   },
   (t) => [index("feed_runs_feed_id_idx").on(t.feedId, t.startedAt)],
+);
+
+/**
+ * Fronta manuálnych importov z adminu — web vloží požiadavku, worker ju
+ * spracuje (poller beží každých 30 s). feedId null = importovať všetky feedy.
+ */
+export const importJobs = pgTable(
+  "import_jobs",
+  {
+    id: serial("id").primaryKey(),
+    feedId: integer("feed_id").references(() => feeds.id, { onDelete: "cascade" }),
+    status: importJobStatusEnum("status").notNull().default("pending"),
+    requestedAt: timestamp("requested_at", { withTimezone: true }).notNull().defaultNow(),
+    startedAt: timestamp("started_at", { withTimezone: true }),
+    finishedAt: timestamp("finished_at", { withTimezone: true }),
+    errorMessage: text("error_message"),
+  },
+  (t) => [index("import_jobs_status_idx").on(t.status, t.requestedAt)],
 );
 
 // ---------------------------------------------------------------------------
@@ -247,6 +273,11 @@ export const feedsRelations = relations(feeds, ({ one, many }) => ({
   shop: one(shops, { fields: [feeds.shopId], references: [shops.id] }),
   runs: many(feedRuns),
   offers: many(offers),
+  importJobs: many(importJobs),
+}));
+
+export const importJobsRelations = relations(importJobs, ({ one }) => ({
+  feed: one(feeds, { fields: [importJobs.feedId], references: [feeds.id] }),
 }));
 
 export const feedRunsRelations = relations(feedRuns, ({ one }) => ({
