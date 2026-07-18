@@ -1,4 +1,4 @@
-import { schema, type Db } from "@app0/db";
+import { schema, snapshotTodayAggregates, type Db } from "@app0/db";
 import { eq, sql } from "drizzle-orm";
 import { log } from "../lib/log";
 import { importAllFeeds, importFeedById } from "./importFeeds";
@@ -33,6 +33,7 @@ export async function processImportJobs(db: Db): Promise<void> {
       } else {
         await importAllFeeds(db);
       }
+      await snapshotTodayAggregates(db);
       await db
         .update(schema.importJobs)
         .set({ status: "success", finishedAt: new Date() })
