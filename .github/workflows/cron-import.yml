@@ -1,0 +1,63 @@
+name: Denný import
+
+# Náhrada workera pre nasadenie zadarmo (NASADENIE.md variant A):
+# denne stiahne feedy, spáruje ponuky, prepočíta agregácie a skontroluje
+# cenové alarmy priamo proti produkčnej DB (secret DATABASE_URL).
+on:
+  schedule:
+    - cron: "0 1 * * *" # 03:00 SELČ
+  workflow_dispatch:
+
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Kontrola konfigurácie
+        id: cfg
+        run: |
+          if [ -z "${{ secrets.DATABASE_URL }}" ]; then
+            echo "DATABASE_URL secret nie je nastavený — preskakujem (pozri NASADENIE.md)."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/checkout@v4
+        if: steps.cfg.outputs.skip != 'true'
+
+      - uses: pnpm/action-setup@v4
+        if: steps.cfg.outputs.skip != 'true'
+
+      - uses: actions/setup-node@v4
+        if: steps.cfg.outputs.skip != 'true'
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Inštalácia
+        if: steps.cfg.outputs.skip != 'true'
+        run: pnpm install --frozen-lockfile
+
+      - name: Import feedov + párovanie + agregácie
+        if: steps.cfg.outputs.skip != 'true'
+        run: pnpm import:feeds
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          FEED_FETCH_CONTACT: ${{ secrets.FEED_FETCH_CONTACT }}
+          APP_BASE_URL: ${{ secrets.APP_BASE_URL }}
+          REVALIDATE_SECRET: ${{ secrets.REVALIDATE_SECRET }}
+
+      - name: Kontrola cenových alarmov
+        if: steps.cfg.outputs.skip != 'true'
+        run: pnpm alerts:check
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          APP_BASE_URL: ${{ secrets.APP_BASE_URL }}
+          MAIL_PROVIDER: ${{ secrets.MAIL_PROVIDER }}
+          MAIL_FROM: ${{ secrets.MAIL_FROM }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          SMTP_URL: ${{ secrets.SMTP_URL }}
+
+      - name: Úprata starej histórie cien
+        if: steps.cfg.outputs.skip != 'true'
+        run: pnpm --filter @app0/worker exec tsx src/cli.ts prune-history
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}

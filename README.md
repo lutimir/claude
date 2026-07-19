@@ -4,8 +4,8 @@ Porovnávač cien pre slovenský a český trh postavený na **legálnom, feed-f
 prístupe**: ceny preberáme výhradne z oficiálnych XML feedov a API, ku ktorým dal
 obchod súhlas. Žiadny scraping bez povolenia.
 
-> Stav projektu a ďalšie kroky: pozri **[ROADMAP.md](./ROADMAP.md)** — projekt je
-> rozdelený na fázy s pripravenými promptami.
+> Stav projektu: pozri **[ROADMAP.md](./ROADMAP.md)** (fázy 0–11 hotové).
+> Ako appku dostať online (aj zadarmo): **[NASADENIE.md](./NASADENIE.md)**.
 
 ## Architektúra
 
