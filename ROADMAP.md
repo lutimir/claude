@@ -166,7 +166,13 @@ Overené E2E (šablóna aj priamy odkaz, logovanie, reporting).
 
 
 - Import robí per-položku SELECT+UPSERT — pri veľkých feedoch (>50k položiek)
-  prejsť na dávkové upserty (fáza 1 alebo 2).
+  prejsť na dávkové upserty. Zmerané: 2000 položiek ≈ 5 s, čo zatiaľ stačí.
+- Fuzzy párovanie stojí ~50 ms na nespárovanú ponuku (trigram dotaz nad celým
+  katalógom). Chráni ho strop FUZZY_MAX_OFFERS_PER_RUN (default 500/beh),
+  zvyšok dobehne v ďalšom behu — pri trvalo veľkom počte ponúk bez EAN zvážiť
+  dávkový dotaz alebo predfiltrovanie podľa značky/kategórie.
+- Sitemap je jeden súbor (5000 produktov ≈ 1,7 MB, 10k URL). Nad ~25 000
+  produktov treba sitemap index (limit Google: 50k URL / 50 MB).
 - Vyhľadávanie pokrýva len názov produktu — rozšíriť o značku, kategóriu
   a popis (fáza 7).
 - Stránky sú dynamické s cachovanou dátovou vrstvou (TTL + tag invalidácia);
